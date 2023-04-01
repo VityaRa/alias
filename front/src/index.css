@@ -1,0 +1,20 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --main-background: #1A1A1A;
+    --main-color: #40403F;
+    --font-color: #F0F0F0;
+}
+
+body {
+    background-color: var(--main-background);
+    color: var(--font-color);
+}
+
+input {
+    all: unset;
+}
