@@ -7,7 +7,6 @@ export interface UserActions {
 
 export interface UserState {
   name?: string;
-  link?: string;
 }
 
 export type UserContextType = UserActions & UserState
@@ -15,7 +14,6 @@ export type UserContextType = UserActions & UserState
 export const UserContext = createContext<UserContextType>({} as UserContextType);
 const defaultState: UserState = {
   name: '',
-  link: '',
 }
 
 export const UserContextProvider: WithChildrens<any> = ({ children }) => {

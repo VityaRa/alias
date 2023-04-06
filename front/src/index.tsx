@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router-dom";
 import "./index.css";
 import { Main } from "./layouts/main";
 import { UserContextProvider } from "./contexts/UserContext";
+import { RoomContextProvider } from "./contexts/RoomContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -12,9 +13,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <UserContextProvider>
-      <Main>
-        <RouterProvider router={Router} />
-      </Main>
+      <RoomContextProvider>
+        <Main>
+          <RouterProvider router={Router} />
+        </Main>
+      </RoomContextProvider>
     </UserContextProvider>
   </React.StrictMode>
 );
