@@ -16,7 +16,7 @@ export const ThemeSelector = () => {
   const setTheme = (themeId: string) => {
     updateRoomState({selectedThemeId: themeId});
   }
-  if (!themes || !themes.length) {
+  if (!themes.length) {
     return <ExtraMargin>Themes loading...</ExtraMargin>
   }
   if (!selectedThemeId) {
@@ -26,11 +26,12 @@ export const ThemeSelector = () => {
   return (
     <StyledThemeSelector 
       values={themes}
-      value={themes.find(theme => theme.id === selectedThemeId)?.name}
+      value={themes.find(theme => theme.id === selectedThemeId)?.id}
       onChange={(e) => {
         const id = e.target.value;
         setTheme(id);
       }}
+      activeValueId={selectedThemeId}
     />
   )
 }

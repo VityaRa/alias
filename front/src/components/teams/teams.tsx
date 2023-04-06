@@ -4,8 +4,12 @@ import { Card } from "./card/card";
 import { VerticalContainer } from "../common/common";
 import styled from "styled-components";
 
+const CardContainer = styled(Card)`
+  background-color: red !important;
+`
+
 const StyledTeams = styled(VerticalContainer)`
-  margin-top: 1rem;
+  margin-top: 2rem;
 `
 
 export const Teams = () => {
@@ -13,9 +17,9 @@ export const Teams = () => {
   return (
     <StyledTeams>
       <div>
-        {teams?.map(team => <Card title={team.title} elements={team.participants}/>)}
+        {teams?.map(team => <CardContainer key={team.title} title={team.title} elements={team.participants}/>)}
       </div>
-      <Card title="Наблюдатели" elements={viewers}/>
+      <CardContainer darkenTitle={false} title="Наблюдатели" elements={viewers}/>
     </StyledTeams>
   )
 }

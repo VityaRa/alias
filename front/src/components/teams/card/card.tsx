@@ -17,20 +17,23 @@ const StyledCard = styled(VerticalContainer)`
 `
 
 const StyledTitle = styled.h2<Partial<IProps>>`
-  background-color: ${props => props.darkenTitle ? COLORS.BACKROUND : COLORS.MAIN_DIMMED};
+  background-color: ${props => props.darkenTitle ? COLORS.MAIN_DIMMED : COLORS.TRANSPARENT};
   width: 100%;
   text-align: center;
   padding: 0.25rem 0;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
 `
 
 const StyledList = styled.ul`
   margin-top: 0.5rem;
+  padding: 0.75rem;
+  padding-bottom: 0;
 `
 
 const StyledElement = styled.li`
-
+  padding-bottom: 0.6rem;
 `
-
 
 export const Card: FC<IProps> = ({title, elements, darkenTitle = true}) => {
   return (
@@ -39,7 +42,7 @@ export const Card: FC<IProps> = ({title, elements, darkenTitle = true}) => {
         {title}
       </StyledTitle>
       <StyledList>
-        {elements?.map(el => <StyledElement />)}
+        {elements?.map(el => <StyledElement key={el.name} />)}
       </StyledList>
     </StyledCard>
   )
