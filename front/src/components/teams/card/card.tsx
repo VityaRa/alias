@@ -2,10 +2,11 @@ import styled from "styled-components";
 import { VerticalContainer } from "../../common/common";
 import { FC } from "react";
 import { COLORS } from "../../../helpers/colors";
+import { IUser } from "../../../api/user/model";
 
 interface IProps {
   title: string;
-  elements?: Array<any>;
+  elements?: IUser[];
   darkenTitle?: boolean;
 }
 
@@ -14,6 +15,7 @@ const StyledCard = styled(VerticalContainer)`
   height: 15rem;
   background-color: ${COLORS.MAIN};
   border-radius: 0.25rem;
+  margin-top: 1.5rem;
 `
 
 const StyledTitle = styled.h2<Partial<IProps>>`
@@ -42,7 +44,7 @@ export const Card: FC<IProps> = ({title, elements, darkenTitle = true}) => {
         {title}
       </StyledTitle>
       <StyledList>
-        {elements?.map(el => <StyledElement key={el.name} />)}
+        {elements?.map(el => <StyledElement key={el.name}>{el.name}</StyledElement>)}
       </StyledList>
     </StyledCard>
   )
