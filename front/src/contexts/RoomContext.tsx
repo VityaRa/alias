@@ -10,6 +10,7 @@ export const testState: RoomState = {
   teams: [
     {
       title: "Test 1",
+      id: 'random1',
       participants: [
         {
           name: "test name",
@@ -20,7 +21,27 @@ export const testState: RoomState = {
           status: UserStatus.READY
         }
       ]
-    }
+    },
+    {
+      title: "Test 2",
+      id: 'random2',
+      participants: [
+        {
+          name: "2 - test name",
+          status: UserStatus.READY
+        },
+        {
+          name: "2 - test name 2",
+          status: UserStatus.READY
+        }
+      ]
+    },
+    {
+      title: "Test 2",
+      id: 'random3',
+      participants: [
+      ]
+    },
   ],
   words: [
     {
@@ -51,6 +72,7 @@ export const testState: RoomState = {
 
 export interface RoomActions {
   updateRoomState: (update: Partial<RoomState>) => void;
+  changeTeam: (teamId: string) => void;
 }
 
 export interface RoomState {
@@ -84,8 +106,13 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
   const updateRoomState = (update: Partial<RoomState>) => {
     setState((prev) => ({ ...prev, ...update }));
   };
+  const changeTeam = (teamId: string) => {
+    // logic to go to team with specified id
+  };
+
   const actions = {
-    updateRoomState
+    updateRoomState,
+    changeTeam,
   };
 
   return (

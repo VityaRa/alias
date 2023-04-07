@@ -10,16 +10,18 @@ const StyledTeamsWrapper = styled(VerticalContainer)`
 
 const StyledTeamsContainer = styled.div`
   display: flex;
+  gap: 1.5rem;
 `
 
 export const Teams = () => {
-  const { teams, viewers } = useContext(RoomContext);
+  const { teams, viewers, changeTeam } = useContext(RoomContext);
+
   return (
     <StyledTeamsWrapper>
       <StyledTeamsContainer>
-        {teams?.map(team => <Card key={team.title} title={team.title} elements={team.participants}/>)}
+        {teams?.map(team => <Card onClick={() => changeTeam(team.id)} key={team.title} title={team.title} elements={team.participants}/>)}
       </StyledTeamsContainer>
-      <Card darkenTitle={false} title="Наблюдатели" elements={viewers}/>
+      <Card onClick={() => changeTeam('id')} darkenTitle={false} title="Наблюдатели" elements={viewers}/>
     </StyledTeamsWrapper>
   )
 }

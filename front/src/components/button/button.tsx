@@ -5,6 +5,9 @@ const StyledButton = styled.button`
   width: auto;
   height: auto;
   border-radius: 0.25rem;
+  outline: none;
+  border: none;
+  cursor: pointer;
 `
 
 interface IProps extends ButtonHTMLAttributes<HTMLButtonElement> {
