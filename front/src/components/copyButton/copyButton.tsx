@@ -10,6 +10,11 @@ const StyledCopyButton = styled(Button)`
   border: none;
   margin-right: 1rem;
   cursor: pointer;
+
+  svg {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
 `
 
 export const CopyButton = () => {

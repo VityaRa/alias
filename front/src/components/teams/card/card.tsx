@@ -14,8 +14,8 @@ interface IProps {
 }
 
 const StyledCard = styled(VerticalContainer)`
-  width: 12rem;
-  height: 15rem;
+  width: 11rem;
+  height: 14rem;
   background-color: ${COLORS.MAIN};
   border-radius: 0.25rem;
   margin-top: 1.5rem;

@@ -3,6 +3,7 @@ import { InviteLink } from '../../components/inviteLink/inviteLink';
 import { VerticalContainer } from '../../components/common/common';
 import { ThemeSelector } from '../../components/themeSelector/themeSelector';
 import { Teams } from '../../components/teams/teams';
+import { StartGame } from '../../components/startGame/startGame';
 
 export const RoomPage = () => {
   const params = useParams();
@@ -13,6 +14,7 @@ export const RoomPage = () => {
       <InviteLink />
       <ThemeSelector />
       <Teams />
+      <StartGame />
     </VerticalContainer>
   )
 }
