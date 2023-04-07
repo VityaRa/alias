@@ -12,4 +12,5 @@ export interface UserDto {
 
 export interface CreateUserDto { 
   name: string;
+  socketId: string;
 }

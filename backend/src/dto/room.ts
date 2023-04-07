@@ -1,8 +1,14 @@
 import { TeamDto } from "./team";
+import { UserDto } from "./user";
 
 export interface RoomDto {
-  teams: TeamDto;
+  teams: TeamDto[];
   id: string;
-  viewers: TeamDto;
+  linkSlug: string;
+  owner: UserDto
+}
+
+export interface JoinRoomDto {
+  user: UserDto;
   linkSlug: string;
 }
