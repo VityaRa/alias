@@ -5,11 +5,11 @@ import { Container } from "../common/common";
 import { CopyButton } from "../copyButton/copyButton";
 
 export const InviteLink = () => {
-  const { link } = useContext(RoomContext);
+  const { linkSlug } = useContext(RoomContext);
   return (
     <Container>
       <CopyButton />
-      <Input readOnly value={link}/>
+      <Input readOnly value={linkSlug}/>
     </Container>
   )
 }

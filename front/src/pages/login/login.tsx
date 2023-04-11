@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,12 @@ import { validateName } from "../../validations/user";
 import { Input, ErrorText } from "../../components";
 import { Button } from "../../components/button/button";
 import { Heading } from "../../components/typography";
+import { SocketContext } from "../../contexts/SocketContext";
+import { IncomingMessages } from "../../helpers/events";
+import { RoomContext } from "../../contexts/RoomContext";
+import { IUser } from "../../api/user/model";
+import { IRoom } from "../../api/room/model";
+import { GetUserResult } from "../../api/common/getUser";
 
 const StyledForm = styled.form`
   display: flex;
@@ -46,8 +52,18 @@ const fetchData = () => {
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { name, setName } = useContext(UserContext);
+  const { login, socket } = useContext(SocketContext);
+  const { name, setName, updateUserState } = useContext(UserContext);
+  const { updateRoomState } = useContext(RoomContext);
   const [error, setError] = useState<string | null>(null);
+  const handleSuccessLogin = (data: GetUserResult) => {
+    updateRoomState(data.room);
+    updateUserState(data.user);
+    console.log(data.room);
+    
+    navigate(data.room.linkSlug);
+  }
+
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errorText = validateName(name);
@@ -55,10 +71,15 @@ export const LoginPage = () => {
       return setError(errorText);
     }
 
-    // request to server;
-    const roomId = fetchData();
-    navigate(`/${roomId}`)
+    login({username: name!});
   };
+
+  useEffect(() => {
+    socket.on(IncomingMessages.GET, handleSuccessLogin);
+    return () => {
+      socket.off(IncomingMessages.GET, handleSuccessLogin);
+    }
+  })
 
   return (
     <StyledForm onSubmit={onSubmit}>

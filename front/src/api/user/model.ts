@@ -6,5 +6,7 @@ export enum UserStatus {
 
 export interface IUser { 
   name?: string;
-  status: UserStatus
+  id?: string;
+  status: UserStatus;
+  socketId?: string;
 }

@@ -18,9 +18,10 @@ const StyledCopyButton = styled(Button)`
 `
 
 export const CopyButton = () => {
-  const { link } = useContext(RoomContext);
+  const { linkSlug, getRoomLink } = useContext(RoomContext);
   const onCopy = () => {
-    navigator.clipboard.writeText(link!);
+    const link = getRoomLink(linkSlug);
+    navigator.clipboard.writeText(link);
   }
 
   return (

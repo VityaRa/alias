@@ -31,11 +31,15 @@ export class RoomService {
     if (!viewersTeam) {
       throw new BadRequestException();
     }
-    const newTeam = this.roomRepository.addUserToTeam(user, room.id, viewersTeam.id);
-    return newTeam;
+    const newRoom = this.roomRepository.addUserToTeam(user, room.id, viewersTeam.id);
+    return newRoom;
   }
 
   emitEveryone() {
 
+  }
+
+  getRoomUsers() {
+    
   }
 }
