@@ -29,7 +29,30 @@ export class ThemeRepository {
         },
       ],
     };
+    const test2: ThemeWithWordsDto = {
+      id: '123123123',
+      title: 'Трудный',
+      words: [
+        {
+          value: 'Кот',
+          id: v4(),
+        },
+        {
+          value: 'Собака',
+          id: v4(),
+        },
+        {
+          value: 'Компьютер',
+          id: v4(),
+        },
+        {
+          value: 'Мышка',
+          id: v4(),
+        },
+      ],
+    };
     this.themes.push(test);
+    this.themes.push(test2);
   }
 
   getLabels() {

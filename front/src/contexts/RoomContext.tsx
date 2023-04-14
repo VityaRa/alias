@@ -1,10 +1,9 @@
 import { createContext, useState } from "react";
-import { WithChildrens } from "../helpers/types";
 import { ITeam } from "../api/team/model";
-import { IUser, UserStatus } from "../api/user/model";
 import { ITheme } from "../api/theme/model";
+import { IUser } from "../api/user/model";
 import { IWord } from "../api/word/model";
-import { WordStatus } from "../api/word/model";
+import { WithChildrens } from "../helpers/types";
 
 // export const testState: RoomState = {
 //   teams: [

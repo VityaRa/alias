@@ -1,9 +1,10 @@
 import { FC, SelectHTMLAttributes } from "react";
 import styled from "styled-components"
+import { ITheme } from "../../api/theme/model";
 
 interface IProps extends SelectHTMLAttributes<HTMLSelectElement> {
-  values?: any[],
-  activeValueId?: string,
+  values?: ITheme[];
+  activeValueId?: string;
 }
 
 const StyledSelect = styled.select`
@@ -20,7 +21,7 @@ const StyledOptions = styled.option`
 export const Select: FC<IProps> = ({values, activeValueId, ...rest}) => {
   return (
     <StyledSelect {...rest}>
-      {values?.map((value) => <StyledOptions key={value.id} selected={activeValueId === value.id} value={value.id}>{value.name}</StyledOptions>)}
+      {values?.map((value) => <StyledOptions key={value.id} value={value.id}>{value.title}</StyledOptions>)}
     </StyledSelect>
   )
 }

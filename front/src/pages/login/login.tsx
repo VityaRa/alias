@@ -12,9 +12,7 @@ import { Heading } from "../../components/typography";
 import { SocketContext } from "../../contexts/SocketContext";
 import { IncomingMessages } from "../../helpers/events";
 import { RoomContext } from "../../contexts/RoomContext";
-import { IUser } from "../../api/user/model";
-import { IRoom } from "../../api/room/model";
-import { GetUserResult } from "../../api/common/getUser";
+import { GetUserResult } from "../../api/common/types";
 
 const StyledForm = styled.form`
   display: flex;
@@ -45,10 +43,6 @@ const FormButton = styled(Button)`
 `;
 
 const FormError = styled.p``;
-
-const fetchData = () => {
-  return (Math.random() + 1).toString(36).substring(7);
-};
 
 export const LoginPage = () => {
   const navigate = useNavigate();
