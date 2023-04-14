@@ -1,20 +1,29 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Router } from "./router";
 import { RouterProvider } from "react-router-dom";
-import "./index.css";
-import { Main } from "./layouts/main";
+
+import { RoomContextProvider } from "./contexts/RoomContext";
+import { SocketContextProvider } from "./contexts/SocketContext";
 import { UserContextProvider } from "./contexts/UserContext";
+
+import "./index.css";
+
+import { Main } from "./layouts/main";
+import { Router } from "./router";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <UserContextProvider>
-      <Main>
-        <RouterProvider router={Router} />
-      </Main>
-    </UserContextProvider>
+    <SocketContextProvider>
+      <UserContextProvider>
+        <RoomContextProvider>
+          <Main>
+            <RouterProvider router={Router} />
+          </Main>
+        </RoomContextProvider>
+      </UserContextProvider>
+    </SocketContextProvider>
   </React.StrictMode>
 );

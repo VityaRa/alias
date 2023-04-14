@@ -21,7 +21,7 @@ export const ErrorText = styled.p`
 `;
 
 interface IProps extends IStyledProps {
-  onChangeValue: (value: string) => void;
+  onChangeValue?: (value: string) => void;
 }
 
 export const Input: FC<IProps> = ({
@@ -33,7 +33,7 @@ export const Input: FC<IProps> = ({
   return (
     <StyledInput
       error={error}
-      onChange={(e) => onChangeValue(e.target.value)}
+      onChange={(e) => onChangeValue && onChangeValue(e.target.value)}
       type={type}
       {...rest}
     />

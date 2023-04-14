@@ -2,9 +2,15 @@ import { ButtonHTMLAttributes, FC, ReactNode } from "react";
 import styled from "styled-components"
 
 const StyledButton = styled.button`
-  width: auto;
-  height: auto;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 0.25rem;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `
 
 interface IProps extends ButtonHTMLAttributes<HTMLButtonElement> {
