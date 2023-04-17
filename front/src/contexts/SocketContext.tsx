@@ -1,10 +1,10 @@
-import { createContext, useEffect, useState } from "react";
-import { WithChildrens } from "../helpers/types";
+import { createContext, useEffect, useMemo, useState } from "react";
 import io, { Socket } from "socket.io-client";
-import { IncomingMessages, SentMessages } from "../helpers/events";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { useNavigate } from "react-router-dom";
-const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL || 'http://localhost:3000';
+import { IncomingMessages, SentMessages } from "../helpers/events";
+import { LS_KEYS, LocalStorageHelper } from "../helpers/localStorage";
+import { WithChildrens } from "../helpers/types";
+const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL || 'http://localhost:3001';
 export const socket = io(GATEWAY_URL);
 
 interface LoginActionProps {
@@ -14,6 +14,7 @@ interface LoginActionProps {
 export interface SocketActions {
   login: (data: LoginActionProps) => void;
   updateState: (update: Partial<SocketState>) => void;
+  getUser: (userId: string, roomId: string) => void;
 }
 
 export interface SocketState {
@@ -42,8 +43,19 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
   const emit = {
     login: ({username}: {username: string}) => {
       socket.emit(SentMessages.LOGIN, { name: username });
+    },
+    getUser: (userId: string, roomId: string) => {
+      socket.emit(SentMessages.GET, { userId, roomId });
     }
   }
+
+  useEffect(() => {
+    const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
+    const roomId = LocalStorageHelper.get(LS_KEYS.ROOM_ID);
+    if (userId) {
+      emit.getUser(userId, roomId)
+    }
+  }, [])
 
   const handlers = {
     connected: () => {
@@ -64,10 +76,10 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
     // socket.on(IncomingMessages.GET, handlers.getUser);
   }
 
-  const actions = {
+  const actions = useMemo(() => ({
     ...emit,
     updateState,
-  };
+  }), []);
 
   useEffect(() => {
     init();

@@ -16,4 +16,12 @@ export class UserService {
   remove(socketId: string) {
     return this.userRepository.remove(socketId);
   }
+
+  get(userId?: string) {
+    if (!userId) {
+      throw new BadRequestException('Incorrect userId');
+    }
+    const user = this.userRepository.getById(userId);
+    return user;
+  }
 }

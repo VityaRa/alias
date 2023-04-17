@@ -15,9 +15,9 @@ const StyledTeamsContainer = styled.div`
 `
 
 export const Teams = () => {
-  const { teams, changeTeam } = useContext(RoomContext);
-  const playersTeams = teams.filter((t) => t.type === TeamType.PLAYABLE);
-  const viewerTeam = teams.find((t) => t.type === TeamType.VIEWERS);
+  const { teamsGroup, changeTeam } = useContext(RoomContext);
+  const playersTeams = teamsGroup.filter((t) => t.type === TeamType.PLAYABLE);
+  const viewerTeam = teamsGroup.find((t) => t.type === TeamType.VIEWERS);
 
   return (
     <StyledTeamsWrapper>

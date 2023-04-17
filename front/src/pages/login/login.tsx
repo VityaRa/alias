@@ -13,6 +13,7 @@ import { SocketContext } from "../../contexts/SocketContext";
 import { IncomingMessages } from "../../helpers/events";
 import { RoomContext } from "../../contexts/RoomContext";
 import { GetUserResult } from "../../api/common/types";
+import { LS_KEYS, LocalStorageHelper } from "../../helpers/localStorage";
 
 const StyledForm = styled.form`
   display: flex;
@@ -53,8 +54,8 @@ export const LoginPage = () => {
   const handleSuccessLogin = (data: GetUserResult) => {
     updateRoomState(data.room);
     updateUserState(data.user);
-    console.log(data.room);
-    
+    LocalStorageHelper.set(LS_KEYS.USER_ID, data.user.id);
+    LocalStorageHelper.set(LS_KEYS.ROOM_ID, data.room.id);
     navigate(data.room.linkSlug);
   }
 
@@ -69,9 +70,9 @@ export const LoginPage = () => {
   };
 
   useEffect(() => {
-    socket.on(IncomingMessages.GET, handleSuccessLogin);
+    socket.on(IncomingMessages.DATA, handleSuccessLogin);
     return () => {
-      socket.off(IncomingMessages.GET, handleSuccessLogin);
+      socket.off(IncomingMessages.DATA, handleSuccessLogin);
     }
   })
 

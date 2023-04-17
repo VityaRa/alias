@@ -13,15 +13,17 @@ import { Server, Socket } from 'socket.io';
 import { RoomService } from './room/room.service';
 import { UserService } from './user/user.service';
 import { JoinRoomDto } from 'src/dto/room';
-import { CreateUserDto } from 'src/dto/user';
+import { CreateUserDto, GetUserDto } from 'src/dto/user';
 
 enum IncomingMessages {
   LOGIN = 'user:login',
   JOIN = 'user:join',
+  GET = 'user:get',
+  TEAM_CHANGE = 'team:change',
 }
 
 enum SentMessages {
-  GET = 'user:get',
+  DATA = 'user:data',
   JOINED = 'user:joined',
 }
 
@@ -32,7 +34,8 @@ export class MainGateway
   constructor(
     private roomService: RoomService,
     private userService: UserService,
-  ) {}
+  ) {
+  }
   @WebSocketServer()
   server: Server;
 
@@ -40,28 +43,45 @@ export class MainGateway
 
   @SubscribeMessage(IncomingMessages.LOGIN)
   handleLogin(@ConnectedSocket() client: Socket, @MessageBody() data: CreateUserDto): void {
+    this.logger.log(`${IncomingMessages.LOGIN}:`, data);
     const user = this.userService.create({
       name: data.name,
       socketId: client.id,
     });
     const room = this.roomService.create(user);
-    client.emit(SentMessages.GET, {
+    const roomDto = this.roomService.toDto(room);
+    client.emit(SentMessages.DATA, {
       user,
-      room,
+      room: roomDto,
     });
   }
 
-  @SubscribeMessage(IncomingMessages.JOIN)
-  handleJoin(client: Socket, payload: JoinRoomDto) {
+  @SubscribeMessage(IncomingMessages.GET)
+  handleGet(@ConnectedSocket() client: Socket, @MessageBody() data: GetUserDto): void {
+    this.logger.log(`${IncomingMessages.GET}:`, data);
+    const user = this.userService.get(data.userId);
+    const room = this.roomService.get(data.roomId);
+    const roomDto = this.roomService.toDto(room);
+    client.emit(SentMessages.DATA, {
+      user,
+      room: roomDto,
+    });
+  }
+
+  @SubscribeMessage(IncomingMessages.TEAM_CHANGE)
+  handleJoin(client: Socket, data: JoinRoomDto) {
+    this.logger.log(`${IncomingMessages.TEAM_CHANGE}:`, data);
+
     // add validations;
-    const room = this.roomService.join(payload);
+    const room = this.roomService.join(data);
     client.emit(SentMessages.JOINED, {
       room,
     });
   }
 
   @SubscribeMessage(IncomingMessages.JOIN)
-  handleTeamChange(client: Socket, payload: JoinRoomDto) {
+  handleTeamChange(client: Socket, data: JoinRoomDto) {
+    this.logger.log(`${IncomingMessages.JOIN}: ${data}`);
     // add validations;
   }
 
@@ -72,7 +92,7 @@ export class MainGateway
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
     try {
-      this.userService.remove(client.id);
+      // this.userService.remove(client.id);
     } catch (e) {
       this.logger.error('cant remove userId: ', client.id);
     }

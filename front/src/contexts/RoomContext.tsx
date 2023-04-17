@@ -76,7 +76,7 @@ export interface RoomActions {
 }
 
 export interface RoomState {
-  teams: Array<ITeam>;
+  teamsGroup: Array<ITeam>;
   words: Array<IWord>;
   linkSlug: string;
   themes: Array<ITheme>;
@@ -91,7 +91,7 @@ export const RoomContext = createContext<RoomContextType>(
 );
 
 const defaultState: RoomState = {
-  teams: [],
+  teamsGroup: [],
   words: [],
   linkSlug: "",
   themes: [],

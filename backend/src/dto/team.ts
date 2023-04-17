@@ -7,7 +7,7 @@ export enum TeamType {
 
 export interface TeamDto {
   title: string;
-  participants: UserDto[],
+  participants: string[],
   id: string;
   type: TeamType,
 }

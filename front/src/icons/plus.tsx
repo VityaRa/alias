@@ -6,18 +6,18 @@ export const AddIcon = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clip-path="url(#clip0_7_280)">
+    <g clipPath="url(#clip0_7_280)">
       <path
         d="M8.99976 0.763855V18.2361"
         stroke="#1A1A1A"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
       <path
         d="M17.2529 9.5L0.74673 9.5"
         stroke="#1A1A1A"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </g>
     <defs>

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { InviteLink } from '../../components/inviteLink/inviteLink';
 import { VerticalContainer } from '../../components/common/common';
 import { ThemeSelector } from '../../components/themeSelector/themeSelector';
@@ -8,10 +8,17 @@ import { useContext, useEffect } from 'react';
 import themeController from '../../api/theme/controller';
 import { RoomContext } from '../../contexts/RoomContext';
 import { ITheme } from '../../api/theme/model';
+import { UserContext } from '../../contexts/UserContext';
+import { SocketContext } from '../../contexts/SocketContext';
+import { IncomingMessages } from '../../helpers/events';
+import { GetUserResult } from '../../api/common/types';
 
 export const RoomPage = () => {
   const params = useParams();
   const { updateRoomState } = useContext(RoomContext);
+  const { socket } = useContext(SocketContext);
+  const navigate = useNavigate();
+  const {name, updateUserState} = useContext(UserContext);
   // add logic to check room
   const getThemes = async () => {
     const labels = await themeController.getLabels();
@@ -20,11 +27,23 @@ export const RoomPage = () => {
 
   useEffect(() => {
     getThemes();
+    socket.on(IncomingMessages.DATA, handleSuccessGet);
+    return () => {
+      socket.off(IncomingMessages.DATA, handleSuccessGet);
+    }
   }, [])
-  
+
+  const handleSuccessGet = (data: GetUserResult) => {
+    updateRoomState(data.room);
+    updateUserState(data.user);
+    navigate(`/${data.room.linkSlug}`);
+  }
 
   return (
     <VerticalContainer>
+      <div style={{color: '#ffffff'}}>
+        USERNAME: {name}
+      </div>
       <InviteLink />
       <ThemeSelector />
       <Teams />
