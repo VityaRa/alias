@@ -27,17 +27,7 @@ export const RoomPage = () => {
 
   useEffect(() => {
     getThemes();
-    socket.on(IncomingMessages.DATA, handleSuccessGet);
-    return () => {
-      socket.off(IncomingMessages.DATA, handleSuccessGet);
-    }
   }, [])
-
-  const handleSuccessGet = (data: GetUserResult) => {
-    updateRoomState(data.room);
-    updateUserState(data.user);
-    navigate(`/${data.room.linkSlug}`);
-  }
 
   return (
     <VerticalContainer>

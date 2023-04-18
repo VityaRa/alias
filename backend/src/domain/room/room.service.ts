@@ -8,12 +8,14 @@ import { UserDto } from 'src/dto/user';
 import { JoinRoomDto, RoomDto, RoomModel } from 'src/dto/room';
 import { TeamType } from 'src/dto/team';
 import { TeamService } from '../team/team.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class RoomService {
   constructor(
     private roomRepository: RoomRepository,
     private teamService: TeamService,
+    private userService: UserService,
   ) {}
 
   get(roomId: string) {
@@ -31,9 +33,15 @@ export class RoomService {
     return room;
   }
 
-  toDto(room: RoomModel): RoomDto {
-    const teamsDto = this.teamService.getDtoFromGroup(room.teamsGroup);
-    return { ...room, teamsGroup: teamsDto };
+  toDto(room?: RoomModel): RoomDto {
+    try {
+      const teamsDto = this.teamService.getDtoFromGroup(room.teamsGroup);
+      const withUsersTeamsDto = this.userService.addUserToDto(teamsDto);
+      return { ...room, teamsGroup: withUsersTeamsDto };
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
   }
 
   join({ linkSlug, user }: JoinRoomDto) {

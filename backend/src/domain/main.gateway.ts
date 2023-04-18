@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -12,8 +12,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { RoomService } from './room/room.service';
 import { UserService } from './user/user.service';
-import { JoinRoomDto } from 'src/dto/room';
+import { ChangeTeamDto, JoinRoomDto } from 'src/dto/room';
 import { CreateUserDto, GetUserDto } from 'src/dto/user';
+import { TeamService } from './team/team.service';
 
 enum IncomingMessages {
   LOGIN = 'user:login',
@@ -25,6 +26,8 @@ enum IncomingMessages {
 enum SentMessages {
   DATA = 'user:data',
   JOINED = 'user:joined',
+  TEAM_CHANGED = 'team:changed',
+  LOGIN_SUCCESS = 'user:login:success',
 }
 
 @WebSocketGateway({cors: true})
@@ -34,6 +37,7 @@ export class MainGateway
   constructor(
     private roomService: RoomService,
     private userService: UserService,
+    private teamService: TeamService,
   ) {
   }
   @WebSocketServer()
@@ -50,7 +54,7 @@ export class MainGateway
     });
     const room = this.roomService.create(user);
     const roomDto = this.roomService.toDto(room);
-    client.emit(SentMessages.DATA, {
+    client.emit(SentMessages.LOGIN_SUCCESS, {
       user,
       room: roomDto,
     });
@@ -59,16 +63,23 @@ export class MainGateway
   @SubscribeMessage(IncomingMessages.GET)
   handleGet(@ConnectedSocket() client: Socket, @MessageBody() data: GetUserDto): void {
     this.logger.log(`${IncomingMessages.GET}:`, data);
-    const user = this.userService.get(data.userId);
-    const room = this.roomService.get(data.roomId);
-    const roomDto = this.roomService.toDto(room);
-    client.emit(SentMessages.DATA, {
-      user,
-      room: roomDto,
-    });
+    try {
+      const user = this.userService.get(data.userId);
+      const room = this.roomService.get(data.roomId);
+      const roomDto = this.roomService.toDto(room);
+      client.emit(SentMessages.DATA, {
+        user,
+        room: roomDto,
+      });
+    } catch (e) {
+      client.emit(SentMessages.DATA, {
+        error: 'error',
+      });
+    }
+
   }
 
-  @SubscribeMessage(IncomingMessages.TEAM_CHANGE)
+  @SubscribeMessage(IncomingMessages.JOIN)
   handleJoin(client: Socket, data: JoinRoomDto) {
     this.logger.log(`${IncomingMessages.TEAM_CHANGE}:`, data);
 
@@ -79,10 +90,17 @@ export class MainGateway
     });
   }
 
-  @SubscribeMessage(IncomingMessages.JOIN)
-  handleTeamChange(client: Socket, data: JoinRoomDto) {
-    this.logger.log(`${IncomingMessages.JOIN}: ${data}`);
-    // add validations;
+  @SubscribeMessage(IncomingMessages.TEAM_CHANGE)
+  handleTeamChange(client: Socket, data: ChangeTeamDto) {
+    this.logger.log(`${IncomingMessages.TEAM_CHANGE}: ${data}`);
+    const room = this.roomService.get(data.roomId);
+    if (!room) {
+      throw new BadRequestException('Комнаты не существует');
+    }
+    this.teamService.move(room.teamsGroup, data.userId, data.teamId);
+    const newRoom = this.roomService.get(data.roomId);
+    const roomDto = this.roomService.toDto(newRoom);
+    client.emit(SentMessages.TEAM_CHANGED, { newRoom: roomDto });
   }
 
   afterInit(server: Server) {

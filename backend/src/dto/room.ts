@@ -19,3 +19,9 @@ export interface JoinRoomDto {
   user: UserDto;
   linkSlug: string;
 }
+
+export interface ChangeTeamDto {
+  roomId: string;
+  userId: string;
+  teamId: string;
+}

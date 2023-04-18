@@ -1,15 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { TeamDto, TeamType } from 'src/dto/team';
+import { Injectable, Logger } from '@nestjs/common';
+import { TeamDto, TeamModel, TeamType } from 'src/dto/team';
 import { UserDto } from 'src/dto/user';
 import { v4 } from 'uuid';
 
 interface TeamMap {
-  [id: string]: TeamDto[]
+  [id: string]: TeamModel[]
 }
 
 @Injectable()
 export class TeamRepository {
   teamMap: TeamMap;
+  private logger: Logger = new Logger('TeamRepository');
   constructor() {
     this.teamMap = {};
   }
@@ -22,25 +23,26 @@ export class TeamRepository {
     return {teams, id: teamGroupId};
   }
 
-  removeFromTeam(team: TeamDto, userId: string) {
+  removeFromTeam(team: TeamModel, userId: string) {
     team.participants = team.participants.filter((pId) => pId !== userId);
     return team;
   }
 
-  addToTeam(team: TeamDto, userId: string) {
+  addToTeam(team: TeamModel, userId: string) {
     team.participants = [...team.participants, userId];
     return team;
   }
 
   move(groupId: string, userId: string, toId: string) {
+    this.logger.log(`Got groupId: ${groupId}, userId: ${userId}, toId: ${toId}`)
     const teamGroup = this.teamMap[groupId];
+    
     const userTeam = teamGroup.find((t) => t.participants.includes(userId));
     if (toId === userTeam.id) {
       return teamGroup;
     }
 
     const movedToTeam = teamGroup.find((t) => t.id === toId);
-
     this.removeFromTeam(userTeam, userId);
     this.addToTeam(movedToTeam, userId);
     return teamGroup;
@@ -53,10 +55,10 @@ export class TeamRepository {
     return this.teamMap[groupId];
   }
 
-  getDefaults(user?: UserDto): TeamDto[] {
+  getDefaults(user?: UserDto): TeamModel[] {
     const initialViewers = [];
     if (user) {
-      initialViewers.push(user);
+      initialViewers.push(user.id);
     }
     return [
       {

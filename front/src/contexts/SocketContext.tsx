@@ -14,7 +14,8 @@ interface LoginActionProps {
 export interface SocketActions {
   login: (data: LoginActionProps) => void;
   updateState: (update: Partial<SocketState>) => void;
-  getUser: (userId: string, roomId: string) => void;
+  getUserRequest: (userId: string, roomId: string) => void;
+  getUserFromStorage: () => void;
 }
 
 export interface SocketState {
@@ -44,18 +45,16 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
     login: ({username}: {username: string}) => {
       socket.emit(SentMessages.LOGIN, { name: username });
     },
-    getUser: (userId: string, roomId: string) => {
+    getUserRequest: (userId: string, roomId: string) => {
       socket.emit(SentMessages.GET, { userId, roomId });
+    },
+    getUserFromStorage() {
+      const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
+      const roomId = LocalStorageHelper.get(LS_KEYS.ROOM_ID);
+      emit.getUserRequest(userId, roomId)
     }
   }
 
-  useEffect(() => {
-    const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
-    const roomId = LocalStorageHelper.get(LS_KEYS.ROOM_ID);
-    if (userId) {
-      emit.getUser(userId, roomId)
-    }
-  }, [])
 
   const handlers = {
     connected: () => {
@@ -67,7 +66,7 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
     },
     getUser: (data: any) => {
       console.log(data);
-    }
+    },
   }
 
   const init = () => {
@@ -83,6 +82,7 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
 
   useEffect(() => {
     init();
+    emit.getUserFromStorage();
     return () => {
       socket.off(IncomingMessages.CONNECTED, handlers.connected)
       socket.off(IncomingMessages.DISCONNECTED, handlers.disconnected);

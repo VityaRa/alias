@@ -24,7 +24,7 @@ export const Teams = () => {
       <StyledTeamsContainer>
         {playersTeams?.map(team => <Card onClick={() => changeTeam(team.id)} key={team.title} title={team.title} elements={team.participants}/>)}
       </StyledTeamsContainer>
-      <Card onClick={() => changeTeam('id')} darkenTitle={false} title="Наблюдатели" elements={viewerTeam?.participants}/>
+      <Card onClick={() => changeTeam(viewerTeam?.id!)} darkenTitle={false} title="Наблюдатели" elements={viewerTeam?.participants}/>
     </StyledTeamsWrapper>
   )
 }

@@ -10,4 +10,6 @@ export enum IncomingMessages {
   JOINED = 'user:joined',
   CONNECTED = 'connected',
   DISCONNECTED = 'disconnected',
+  TEAM_CHANGED = 'team:changed',
+  LOGIN_SUCCESS = 'user:login:success',
 }

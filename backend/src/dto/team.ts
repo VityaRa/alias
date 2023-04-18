@@ -5,9 +5,16 @@ export enum TeamType {
   VIEWERS = 'VIEWERS',
 }
 
-export interface TeamDto {
+export interface TeamModel {
   title: string;
   participants: string[],
+  id: string;
+  type: TeamType,
+}
+
+export interface TeamDto {
+  title: string;
+  participants: UserDto[],
   id: string;
   type: TeamType,
 }

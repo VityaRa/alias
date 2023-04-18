@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from 'src/dto/user';
 import { UserRepository } from '../storage/user.repository';
+import { TeamDto, TeamModel } from 'src/dto/team';
+import { RoomDto } from 'src/dto/room';
 
 @Injectable()
 export class UserService {
@@ -23,5 +25,9 @@ export class UserService {
     }
     const user = this.userRepository.getById(userId);
     return user;
+  }
+
+  addUserToDto(teams: TeamModel[]) {
+    return teams.map((t) => ({...t, participants: t.participants.map((pId) => this.get(pId))}));
   }
 }

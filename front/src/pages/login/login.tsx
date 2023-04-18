@@ -52,6 +52,11 @@ export const LoginPage = () => {
   const { updateRoomState } = useContext(RoomContext);
   const [error, setError] = useState<string | null>(null);
   const handleSuccessLogin = (data: GetUserResult) => {
+    if (!data.room) {
+      LocalStorageHelper.remove(LS_KEYS.USER_ID);
+      LocalStorageHelper.remove(LS_KEYS.ROOM_ID);
+      return;
+    }
     updateRoomState(data.room);
     updateUserState(data.user);
     LocalStorageHelper.set(LS_KEYS.USER_ID, data.user.id);
@@ -70,9 +75,9 @@ export const LoginPage = () => {
   };
 
   useEffect(() => {
-    socket.on(IncomingMessages.DATA, handleSuccessLogin);
+    socket.on(IncomingMessages.LOGIN_SUCCESS, handleSuccessLogin);
     return () => {
-      socket.off(IncomingMessages.DATA, handleSuccessLogin);
+      socket.off(IncomingMessages.LOGIN_SUCCESS, handleSuccessLogin);
     }
   })
 

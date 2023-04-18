@@ -1,9 +1,13 @@
-import { createContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { ITeam } from "../api/team/model";
 import { ITheme } from "../api/theme/model";
 import { IUser } from "../api/user/model";
 import { IWord } from "../api/word/model";
 import { WithChildrens } from "../helpers/types";
+import { SocketContext } from "./SocketContext";
+import { IncomingMessages, SentMessages } from "../helpers/events";
+import { LS_KEYS, LocalStorageHelper } from "../helpers/localStorage";
+import { IRoom } from "../api/room/model";
 
 // export const testState: RoomState = {
 //   teams: [
@@ -82,6 +86,7 @@ export interface RoomState {
   themes: Array<ITheme>;
   selectedThemeId?: string;
   viewers: Array<IUser>;
+  id?: string;
 }
 
 export type RoomContextType = RoomActions & RoomState;
@@ -101,12 +106,18 @@ const defaultState: RoomState = {
 
 export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
   const [state, setState] = useState(defaultState);
+  const { socket } = useContext(SocketContext);
   const updateRoomState = (update: Partial<RoomState>) => {
     setState((prev) => ({ ...prev, ...update }));
   };
   const changeTeam = (teamId: string) => {
-    // logic to go to team with specified id
+    const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
+    socket.emit(SentMessages.TEAM_CHANGE, { teamId, userId, roomId: state.id! })
   };
+
+  const handleChangeTeam = ({newRoom}: {newRoom: IRoom}) => {
+    updateRoomState({...newRoom})
+  }
 
   const getRoomLink = (slug: string) => {
     return window.location.hostname + '/' + slug;
@@ -117,6 +128,13 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
     changeTeam,
     getRoomLink,
   };
+
+  useEffect(() => {
+    socket.on(IncomingMessages.TEAM_CHANGED, handleChangeTeam);
+    return () => {
+      socket.off(IncomingMessages.TEAM_CHANGED, handleChangeTeam);
+    }
+  }, [])
 
   return (
     <RoomContext.Provider value={{ ...actions, ...state }}>
