@@ -14,4 +14,19 @@ export interface IResponse<T> extends AxiosResponse {
 export interface GetUserResult {
   user: IUser,
   room: IRoom,
+  error?: string;
+}
+
+export enum API_ERRORS {
+  DEFAULT = 'error',
+}
+
+export interface GetOrCreateRoom {
+  room: IRoom,
+  error?: string;
+}
+
+export interface LoginUserResult {
+  user: IUser,
+  error?: string;
 }

@@ -15,16 +15,16 @@ const StyledTeamsContainer = styled.div`
 `
 
 export const Teams = () => {
-  const { teams, changeTeam } = useContext(RoomContext);
-  const playersTeams = teams.filter((t) => t.type === TeamType.PLAYABLE);
-  const viewerTeam = teams.find((t) => t.type === TeamType.VIEWERS);
+  const { teamsGroup, changeTeam } = useContext(RoomContext);
+  const playersTeams = teamsGroup.filter((t) => t.type === TeamType.PLAYABLE);
+  const viewerTeam = teamsGroup.find((t) => t.type === TeamType.VIEWERS);
 
   return (
     <StyledTeamsWrapper>
       <StyledTeamsContainer>
         {playersTeams?.map(team => <Card onClick={() => changeTeam(team.id)} key={team.title} title={team.title} elements={team.participants}/>)}
       </StyledTeamsContainer>
-      <Card onClick={() => changeTeam('id')} darkenTitle={false} title="Наблюдатели" elements={viewerTeam?.participants}/>
+      <Card onClick={() => changeTeam(viewerTeam?.id!)} darkenTitle={false} title="Наблюдатели" elements={viewerTeam?.participants}/>
     </StyledTeamsWrapper>
   )
 }

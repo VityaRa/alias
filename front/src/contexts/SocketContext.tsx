@@ -1,10 +1,10 @@
-import { createContext, useEffect, useState } from "react";
-import { WithChildrens } from "../helpers/types";
+import { createContext, useEffect, useMemo, useState } from "react";
 import io, { Socket } from "socket.io-client";
-import { IncomingMessages, SentMessages } from "../helpers/events";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { useNavigate } from "react-router-dom";
-const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL || 'http://localhost:3000';
+import { DefaultMessages, SentMessages } from "../helpers/events";
+import { LS_KEYS, LocalStorageHelper } from "../helpers/localStorage";
+import { WithChildrens } from "../helpers/types";
+const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL || 'http://localhost:3001';
 export const socket = io(GATEWAY_URL);
 
 interface LoginActionProps {
@@ -14,6 +14,9 @@ interface LoginActionProps {
 export interface SocketActions {
   login: (data: LoginActionProps) => void;
   updateState: (update: Partial<SocketState>) => void;
+  getUserRequest: (userId: string, roomId: string) => void;
+  getUserFromStorage: () => void;
+  getOrCreateRoom: (roomSlug: string | null) => void;
 }
 
 export interface SocketState {
@@ -42,6 +45,18 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
   const emit = {
     login: ({username}: {username: string}) => {
       socket.emit(SentMessages.LOGIN, { name: username });
+    },
+    getUserRequest: (userId: string, roomSlug: string) => {
+      socket.emit(SentMessages.GET, { userId, roomSlug });
+    },
+    getUserFromStorage() {
+      const roomIdFromLink = window.location.pathname.slice(1);
+      const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
+      emit.getUserRequest(userId, roomIdFromLink)
+    },
+    getOrCreateRoom(roomSlug: string | null) {
+      const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
+      socket.emit(SentMessages.GET_OR_CREATE_ROOM, { roomSlug, userId })
     }
   }
 
@@ -55,26 +70,25 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
     },
     getUser: (data: any) => {
       console.log(data);
-    }
+    },
   }
 
   const init = () => {
-    socket.on(IncomingMessages.CONNECTED, handlers.connected)
-    socket.on(IncomingMessages.DISCONNECTED, handlers.disconnected);
-    // socket.on(IncomingMessages.GET, handlers.getUser);
+    socket.on(DefaultMessages.CONNECTED, handlers.connected)
+    socket.on(DefaultMessages.DISCONNECTED, handlers.disconnected);
+    emit.getUserFromStorage();
   }
 
-  const actions = {
+  const actions = useMemo(() => ({
     ...emit,
     updateState,
-  };
+  }), []);
 
   useEffect(() => {
     init();
     return () => {
-      socket.off(IncomingMessages.CONNECTED, handlers.connected)
-      socket.off(IncomingMessages.DISCONNECTED, handlers.disconnected);
-      // socket.off(IncomingMessages.GET, handlers.getUser);
+      socket.off(DefaultMessages.CONNECTED, handlers.connected)
+      socket.off(DefaultMessages.DISCONNECTED, handlers.disconnected);
     }
   }, []);
 

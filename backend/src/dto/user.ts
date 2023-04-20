@@ -14,4 +14,15 @@ export interface UserDto {
 export interface CreateUserDto { 
   name: string;
   socketId: string;
+  roomSlug?: string;
+}
+
+export interface GetUserDto { 
+  userId: string;
+  roomSlug: string;
+}
+
+export interface CreateRoomDto {
+  userId: string;
+  roomSlug?: string;
 }

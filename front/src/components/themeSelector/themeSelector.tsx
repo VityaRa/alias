@@ -1,7 +1,7 @@
-import { useContext } from "react"
-import { Select } from "../select/select"
-import { RoomContext } from "../../contexts/RoomContext";
+import { useContext } from "react";
 import styled from "styled-components";
+import { RoomContext } from "../../contexts/RoomContext";
+import { Select } from "../select/select";
 
 const ExtraMargin = styled.div`
   margin-top: 1.25rem;
