@@ -16,7 +16,7 @@ export interface RoomDto {
 }
 
 export interface JoinRoomDto {
-  user: UserDto;
+  userId: string;
   linkSlug: string;
 }
 

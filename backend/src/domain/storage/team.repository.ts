@@ -24,6 +24,9 @@ export class TeamRepository {
   }
 
   removeFromTeam(team: TeamModel, userId: string) {
+    if (!team) {
+      return null;
+    }
     team.participants = team.participants.filter((pId) => pId !== userId);
     return team;
   }
@@ -38,13 +41,23 @@ export class TeamRepository {
     const teamGroup = this.teamMap[groupId];
     
     const userTeam = teamGroup.find((t) => t.participants.includes(userId));
-    if (toId === userTeam.id) {
+    if (toId === userTeam?.id) {
       return teamGroup;
     }
 
     const movedToTeam = teamGroup.find((t) => t.id === toId);
-    this.removeFromTeam(userTeam, userId);
-    this.addToTeam(movedToTeam, userId);
+    const removedFromTeam = this.removeFromTeam(userTeam, userId);
+    const addedToTeam = this.addToTeam(movedToTeam, userId);
+
+    this.teamMap[groupId] = teamGroup.map((t) => {
+      if (t.id === removedFromTeam?.id) {
+        t.participants = removedFromTeam.participants;
+      }
+      if (t.id === addedToTeam?.id) {
+        t.participants = addedToTeam.participants;
+      }
+      return t;
+    })
     return teamGroup;
   }
 
@@ -84,5 +97,9 @@ export class TeamRepository {
 
   getDtoFromGroupId(groupId: string) {
     return this.teamMap[groupId];
+  }
+
+  debug(): any {
+    return this.teamMap;
   }
 }

@@ -28,10 +28,22 @@ export class UserRepository {
     return this.usersMap[id];
   }
 
+  updateById(id: string, update?: Partial<UserDto>) {
+    this.usersMap[id] = {...this.usersMap[id], ...update}
+  }
+
   remove(socketId: string) {
     const user = Object.values(this.usersMap).find((v) => v.socketId === socketId);
     const { id }= user;
     delete this.usersMap[id];
     return user;
+  }
+
+  changeStatus(id: string, status: UserStatus) {
+    this.usersMap[id] = {...this.usersMap[id], status};
+  }
+
+  getBySocket(socketId: string) {
+    return Object.values(this.usersMap).find((u) => u.socketId === socketId);
   }
 }

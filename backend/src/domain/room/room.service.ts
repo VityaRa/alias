@@ -9,6 +9,7 @@ import { JoinRoomDto, RoomDto, RoomModel } from 'src/dto/room';
 import { TeamType } from 'src/dto/team';
 import { TeamService } from '../team/team.service';
 import { UserService } from '../user/user.service';
+import { ERRORS } from '../errors/codes';
 
 @Injectable()
 export class RoomService {
@@ -22,15 +23,31 @@ export class RoomService {
     return this.roomRepository.getById(roomId);
   }
 
-  create(user: UserDto) {
-    if (!user) {
+  getFromLink(link: string) {;
+    if (!link) {
+      throw new BadRequestException(ERRORS.NLE);
+    }
+    const roomByLink = this.roomRepository.getRoomByLink(link);
+    if (!roomByLink) {
+      throw new UnauthorizedException(ERRORS.NRFL);
+    }
+    return roomByLink;
+  }
+
+  createOrGet(user: UserDto, link?: string) {
+    if (!user) { 
       throw new UnauthorizedException();
     }
 
-    const room = this.roomRepository.create(user);
-    const { id } = this.teamService.create(user);
-    room.teamsGroup = id;
-    return room;
+    try {
+      const existRoom = this.getFromLink(link);
+      return existRoom;
+    } catch (e) {
+      const room = this.roomRepository.create(user);
+      const { id } = this.teamService.create(user);
+      room.teamsGroup = id;
+      return room;
+    }
   }
 
   toDto(room?: RoomModel): RoomDto {
@@ -44,30 +61,38 @@ export class RoomService {
     }
   }
 
-  join({ linkSlug, user }: JoinRoomDto) {
+  join({ linkSlug, userId }: JoinRoomDto): RoomModel | null {
     const room = this.roomRepository.getRoomByLink(linkSlug);
     if (!room) {
-      throw new BadRequestException('Комнаты не существует');
+      return null;
     }
     const participants = this.teamService.getParticipantsIds(room.teamsGroup);
-    if (participants.includes(user.id)) {
-      throw new BadRequestException('Вы уже в комнате');
+    if (participants.includes(userId)) {
+      return null;
     }
 
     const teams = this.teamService.getDtoFromGroup(room.teamsGroup);
     const viewersTeam = teams.find((t) => t.type === TeamType.VIEWERS);
     if (!viewersTeam) {
-      throw new BadRequestException();
+      return null;
     }
-    const newRoom = this.teamService.move(
+
+    const newTeam = this.teamService.move(
       room.teamsGroup,
-      user.id,
+      userId,
       viewersTeam.id,
     );
-    return newRoom;
+    
+    return room;
   }
 
   emitEveryone() {}
 
-  getRoomUsers() {}
+  getUsersToNotify(room: RoomDto) {
+    return room.teamsGroup.flatMap((t) => t.participants).map(u => u.socketId);
+  }
+
+  debug() {
+    return this.roomRepository.debug();
+  }
 }

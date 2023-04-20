@@ -20,3 +20,13 @@ export interface GetUserResult {
 export enum API_ERRORS {
   DEFAULT = 'error',
 }
+
+export interface GetOrCreateRoom {
+  room: IRoom,
+  error?: string;
+}
+
+export interface LoginUserResult {
+  user: IUser,
+  error?: string;
+}

@@ -1,7 +1,7 @@
 import { createContext, useEffect, useMemo, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { IncomingMessages, SentMessages } from "../helpers/events";
+import { DefaultMessages, SentMessages } from "../helpers/events";
 import { LS_KEYS, LocalStorageHelper } from "../helpers/localStorage";
 import { WithChildrens } from "../helpers/types";
 const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL || 'http://localhost:3001';
@@ -16,6 +16,7 @@ export interface SocketActions {
   updateState: (update: Partial<SocketState>) => void;
   getUserRequest: (userId: string, roomId: string) => void;
   getUserFromStorage: () => void;
+  getOrCreateRoom: (roomSlug: string | null) => void;
 }
 
 export interface SocketState {
@@ -45,16 +46,19 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
     login: ({username}: {username: string}) => {
       socket.emit(SentMessages.LOGIN, { name: username });
     },
-    getUserRequest: (userId: string, roomId: string) => {
-      socket.emit(SentMessages.GET, { userId, roomId });
+    getUserRequest: (userId: string, roomSlug: string) => {
+      socket.emit(SentMessages.GET, { userId, roomSlug });
     },
     getUserFromStorage() {
+      const roomIdFromLink = window.location.pathname.slice(1);
       const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
-      const roomId = LocalStorageHelper.get(LS_KEYS.ROOM_ID);
-      emit.getUserRequest(userId, roomId)
+      emit.getUserRequest(userId, roomIdFromLink)
+    },
+    getOrCreateRoom(roomSlug: string | null) {
+      const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
+      socket.emit(SentMessages.GET_OR_CREATE_ROOM, { roomSlug, userId })
     }
   }
-
 
   const handlers = {
     connected: () => {
@@ -70,9 +74,9 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
   }
 
   const init = () => {
-    socket.on(IncomingMessages.CONNECTED, handlers.connected)
-    socket.on(IncomingMessages.DISCONNECTED, handlers.disconnected);
-    // socket.on(IncomingMessages.GET, handlers.getUser);
+    socket.on(DefaultMessages.CONNECTED, handlers.connected)
+    socket.on(DefaultMessages.DISCONNECTED, handlers.disconnected);
+    emit.getUserFromStorage();
   }
 
   const actions = useMemo(() => ({
@@ -82,11 +86,9 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
 
   useEffect(() => {
     init();
-    emit.getUserFromStorage();
     return () => {
-      socket.off(IncomingMessages.CONNECTED, handlers.connected)
-      socket.off(IncomingMessages.DISCONNECTED, handlers.disconnected);
-      // socket.off(IncomingMessages.GET, handlers.getUser);
+      socket.off(DefaultMessages.CONNECTED, handlers.connected)
+      socket.off(DefaultMessages.DISCONNECTED, handlers.disconnected);
     }
   }, []);
 

@@ -1,4 +1,4 @@
-export enum SentMessages {
+export enum IncomingMessages {
   LOGIN = 'user:login',
   JOIN = 'user:join',
   GET = 'user:get',
@@ -6,12 +6,7 @@ export enum SentMessages {
   GET_OR_CREATE_ROOM = 'room:get_create',
 }
 
-export enum DefaultMessages {
-  CONNECTED = 'connected',
-  DISCONNECTED = 'disconnected',
-}
-
-export enum IncomingMessages {
+export enum SentMessages {
   LOGIN = 'sent:user:login',
   JOIN = 'sent:user:join',
   GET = 'sent:user:get',

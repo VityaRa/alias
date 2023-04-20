@@ -11,12 +11,9 @@ interface RoomMap {
 
 @Injectable()
 export class RoomRepository {
-  roomMap: RoomMap;
+  public roomMap: RoomMap;
   constructor() {
     this.roomMap = {};
-    setInterval(() => {
-      console.log(this.roomMap);
-    }, 5000)
   }
 
   create(userDto: UserDto) {
@@ -40,29 +37,9 @@ export class RoomRepository {
     return Object.values(this.roomMap).find((r) => r.linkSlug === link);
   }
   
-  // addUserToTeam(user: UserDto, roomId: string, teamId: string): RoomDto {
-  //   const room = this.getById(roomId);
-  //   const team = room.teams.find((t) => t.id === teamId);
-  //   const newTeamParticipants = [...team.participants, user];
-  //   const newTeams = room.teams.map((t) => {
-  //     if (t.id === teamId) {
-  //       return {
-  //         ...t,
-  //         participants: newTeamParticipants,
-  //       }
-  //     }
-  //   });
-
-  //   return {
-  //     ...room,
-  //     teams: newTeams,
-  //   };
-  // }
-
-  // getViewersTeamId(roomId: string) {
-  //   const room = this.getById(roomId);
-  //   return room.teams.find((t) => t.type === TeamType.VIEWERS);
-  // }
+  debug(): any {
+    return this.roomMap
+  }
 
   updateRoomById(roomId: string, update: RoomModel) {
     this.roomMap[roomId] = update;

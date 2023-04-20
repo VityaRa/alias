@@ -1,7 +1,6 @@
 export const LS_KEYS = {
   USER_ID: '__USER_ID',
   SOCKET_ID: '__SOCKET_ID',
-  ROOM_ID: '__ROOM_ID',
 }
 
 export class LocalStorageHelper {

@@ -25,4 +25,8 @@ export class TeamService {
   move(groupId: string, userId: string, toId: string) {
     return this.teamRepository.move(groupId, userId, toId);
   }
+
+  debug() {
+    return this.teamRepository.debug();
+  }
 }

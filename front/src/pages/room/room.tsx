@@ -1,24 +1,23 @@
-import { useNavigate, useParams } from 'react-router-dom'
-import { InviteLink } from '../../components/inviteLink/inviteLink';
-import { VerticalContainer } from '../../components/common/common';
-import { ThemeSelector } from '../../components/themeSelector/themeSelector';
-import { Teams } from '../../components/teams/teams';
-import { StartGame } from '../../components/startGame/startGame';
 import { useContext, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import themeController from '../../api/theme/controller';
-import { RoomContext } from '../../contexts/RoomContext';
 import { ITheme } from '../../api/theme/model';
-import { UserContext } from '../../contexts/UserContext';
+import { VerticalContainer } from '../../components/common/common';
+import { InviteLink } from '../../components/inviteLink/inviteLink';
+import { Login } from '../../components/login/login';
+import { StartGame } from '../../components/startGame/startGame';
+import { Teams } from '../../components/teams/teams';
+import { ThemeSelector } from '../../components/themeSelector/themeSelector';
+import { RoomContext } from '../../contexts/RoomContext';
 import { SocketContext } from '../../contexts/SocketContext';
-import { IncomingMessages } from '../../helpers/events';
-import { GetUserResult } from '../../api/common/types';
+import { UserContext } from '../../contexts/UserContext';
 
 export const RoomPage = () => {
   const params = useParams();
-  const { updateRoomState } = useContext(RoomContext);
+  const { updateRoomState, id: roomId } = useContext(RoomContext);
   const { socket } = useContext(SocketContext);
   const navigate = useNavigate();
-  const {name, updateUserState} = useContext(UserContext);
+  const {id: userId, name, updateUserState} = useContext(UserContext);
   // add logic to check room
   const getThemes = async () => {
     const labels = await themeController.getLabels();
@@ -28,6 +27,10 @@ export const RoomPage = () => {
   useEffect(() => {
     getThemes();
   }, [])
+
+  if (!roomId || !userId) {
+    return <Login withJoin />
+  }
 
   return (
     <VerticalContainer>

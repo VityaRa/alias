@@ -9,70 +9,6 @@ import { IncomingMessages, SentMessages } from "../helpers/events";
 import { LS_KEYS, LocalStorageHelper } from "../helpers/localStorage";
 import { IRoom } from "../api/room/model";
 
-// export const testState: RoomState = {
-//   teams: [
-//     {
-//       title: "Test 1",
-//       id: 'random1',
-//       participants: [
-//         {
-//           name: "test name",
-//           status: UserStatus.READY
-//         },
-//         {
-//           name: "test name 2",
-//           status: UserStatus.READY
-//         }
-//       ],
-//     },
-//     {
-//       title: "Test 2",
-//       id: 'random2',
-//       participants: [
-//         {
-//           name: "2 - test name",
-//           status: UserStatus.READY
-//         },
-//         {
-//           name: "2 - test name 2",
-//           status: UserStatus.READY
-//         }
-//       ]
-//     },
-//     {
-//       title: "Test 2",
-//       id: 'random3',
-//       participants: [
-//       ]
-//     },
-//   ],
-//   words: [
-//     {
-//       value: "123213",
-//       id: "213",
-//       status: WordStatus.CORRECT
-//     }
-//   ],
-//   link: "testlink123213",
-//   themes: [
-//     {
-//       name: "Обычный",
-//       id: "gwegerijgiowerjgioo"
-//     },
-//     {
-//       name: "Сложный",
-//       id: "gwegerijgiowerjgio123"
-//     }
-//   ],
-//   selectedThemeId: "",
-//   viewers: [
-//     {
-//       name: "vieview1",
-//       status: UserStatus.DISCONNECTED
-//     }
-//   ]
-// };
-
 export interface RoomActions {
   updateRoomState: (update: Partial<RoomState>) => void;
   changeTeam: (teamId: string) => void;
@@ -87,6 +23,7 @@ export interface RoomState {
   selectedThemeId?: string;
   viewers: Array<IUser>;
   id?: string;
+  owner: IUser | null;
 }
 
 export type RoomContextType = RoomActions & RoomState;
@@ -101,7 +38,8 @@ const defaultState: RoomState = {
   linkSlug: "",
   themes: [],
   selectedThemeId: "",
-  viewers: []
+  viewers: [],
+  owner: null,
 };
 
 export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
@@ -130,9 +68,9 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
   };
 
   useEffect(() => {
-    socket.on(IncomingMessages.TEAM_CHANGED, handleChangeTeam);
+    socket.on(IncomingMessages.TEAM_CHANGE, handleChangeTeam);
     return () => {
-      socket.off(IncomingMessages.TEAM_CHANGED, handleChangeTeam);
+      socket.off(IncomingMessages.TEAM_CHANGE, handleChangeTeam);
     }
   }, [])
 
