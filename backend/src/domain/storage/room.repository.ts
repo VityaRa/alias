@@ -16,7 +16,7 @@ export class RoomRepository {
     this.roomMap = {};
   }
 
-  create(userDto: UserDto) {
+  create(userDto: UserDto, themeId: string) {
     const roomId = v4();
     const linkSlug = v4();
     const room: RoomModel = {
@@ -24,6 +24,7 @@ export class RoomRepository {
       id: roomId,
       linkSlug,
       owner: userDto,
+      selectedThemeId: themeId,
     }
     this.roomMap[room.id] = room;
     return room;

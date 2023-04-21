@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { RoomRepository } from '../storage/room.repository';
@@ -10,6 +11,7 @@ import { TeamType } from 'src/dto/team';
 import { TeamService } from '../team/team.service';
 import { UserService } from '../user/user.service';
 import { ERRORS } from '../errors/codes';
+import { ThemeService } from '../theme/theme.service';
 
 @Injectable()
 export class RoomService {
@@ -17,13 +19,23 @@ export class RoomService {
     private roomRepository: RoomRepository,
     private teamService: TeamService,
     private userService: UserService,
+    private themeService: ThemeService,
   ) {}
 
   get(roomId: string) {
     return this.roomRepository.getById(roomId);
   }
 
-  getFromLink(link: string) {;
+  changeTheme(roomModel: RoomModel, themeId: string) {
+    const themeExist = this.themeService.checkIfExists(themeId);
+    if (!themeExist) {
+      throw new NotFoundException('not_found_theme');
+    }
+    roomModel.selectedThemeId = themeId;
+    return roomModel;
+  }
+
+  getFromLink(link: string) {
     if (!link) {
       throw new BadRequestException(ERRORS.NLE);
     }
@@ -32,6 +44,10 @@ export class RoomService {
       throw new UnauthorizedException(ERRORS.NRFL);
     }
     return roomByLink;
+  }
+
+  checkIsOwner(room: RoomModel, userId: string) {
+    return room.owner.id === userId;
   }
 
   createOrGet(user: UserDto, link?: string) {
@@ -43,7 +59,8 @@ export class RoomService {
       const existRoom = this.getFromLink(link);
       return existRoom;
     } catch (e) {
-      const room = this.roomRepository.create(user);
+      const themeId = this.themeService.getDefault().id;
+      const room = this.roomRepository.create(user, themeId);
       const { id } = this.teamService.create(user);
       room.teamsGroup = id;
       return room;
@@ -85,8 +102,6 @@ export class RoomService {
     
     return room;
   }
-
-  emitEveryone() {}
 
   getUsersToNotify(room: RoomDto) {
     return room.teamsGroup.flatMap((t) => t.participants).map(u => u.socketId);

@@ -6,6 +6,7 @@ export interface RoomModel {
   linkSlug: string;
   owner: UserDto;
   teamsGroup: string | null;
+  selectedThemeId: string;
 }
 
 export interface RoomDto {
@@ -24,4 +25,9 @@ export interface ChangeTeamDto {
   roomId: string;
   userId: string;
   teamId: string;
+}
+
+export interface ChangeThemeDto {
+  themeId: string;
+  linkSlug: string;
 }

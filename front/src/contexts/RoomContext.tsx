@@ -13,6 +13,7 @@ export interface RoomActions {
   updateRoomState: (update: Partial<RoomState>) => void;
   changeTeam: (teamId: string) => void;
   getRoomLink: (slug: string) => string;
+  changeTheme: (themeId: string) => void;
 }
 
 export interface RoomState {
@@ -52,9 +53,16 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
     const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
     socket.emit(SentMessages.TEAM_CHANGE, { teamId, userId, roomId: state.id! })
   };
+  const changeTheme = (themeId: string) => {
+    socket.emit(SentMessages.THEME_CHANGE, { themeId, linkSlug: state.linkSlug });
+  }
 
   const handleChangeTeam = ({newRoom}: {newRoom: IRoom}) => {
     updateRoomState({...newRoom})
+  }
+  
+  const handleThemeChange = ({newThemeId}: {newThemeId: string}) => {
+    updateRoomState({selectedThemeId: newThemeId});
   }
 
   const getRoomLink = (slug: string) => {
@@ -65,12 +73,15 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
     updateRoomState,
     changeTeam,
     getRoomLink,
+    changeTheme,
   };
 
   useEffect(() => {
     socket.on(IncomingMessages.TEAM_CHANGE, handleChangeTeam);
+    socket.on(IncomingMessages.THEME_CHANGE, handleThemeChange);
     return () => {
       socket.off(IncomingMessages.TEAM_CHANGE, handleChangeTeam);
+      socket.off(IncomingMessages.THEME_CHANGE, handleThemeChange);
     }
   }, [])
 

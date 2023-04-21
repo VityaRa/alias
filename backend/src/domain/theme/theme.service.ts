@@ -9,4 +9,12 @@ export class ThemeService {
   getList(): ThemeDto[] {
     return this.themeRepository.getLabels();
   }
+
+  checkIfExists(themeId: string) {
+    return Boolean(this.themeRepository.getLabels().find((t) => t.id === themeId));
+  }
+
+  getDefault() {
+    return this.getList()[0];
+  }
 }

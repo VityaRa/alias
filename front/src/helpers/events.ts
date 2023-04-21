@@ -4,6 +4,7 @@ export enum SentMessages {
   GET = 'user:get',
   TEAM_CHANGE = 'team:change',
   GET_OR_CREATE_ROOM = 'room:get_create',
+  THEME_CHANGE = 'room:change_theme',
 }
 
 export enum DefaultMessages {
@@ -17,4 +18,5 @@ export enum IncomingMessages {
   GET = 'sent:user:get',
   TEAM_CHANGE = 'sent:team:change',
   GET_OR_CREATE_ROOM = 'sent:room:get_create',
+  THEME_CHANGE = 'sent:room:change_theme',
 }

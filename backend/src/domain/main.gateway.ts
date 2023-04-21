@@ -12,8 +12,13 @@ import {
 import { Server, Socket } from 'socket.io';
 import { RoomService } from './room/room.service';
 import { UserService } from './user/user.service';
-import { ChangeTeamDto, JoinRoomDto } from 'src/dto/room';
-import { CreateRoomDto, CreateUserDto, GetUserDto, UserStatus } from 'src/dto/user';
+import { ChangeTeamDto, ChangeThemeDto, JoinRoomDto } from 'src/dto/room';
+import {
+  CreateRoomDto,
+  CreateUserDto,
+  GetUserDto,
+  UserStatus,
+} from 'src/dto/user';
 import { TeamService } from './team/team.service';
 import { ERRORS } from './errors/codes';
 import { IncomingMessages, SentMessages } from './events/events';
@@ -33,7 +38,7 @@ export class MainGateway
   private logger: Logger = new Logger('AppGateway');
 
   /**
-   * 
+   *
    * @param client socket
    * @param data CreateUserDto
    * @description Create user by his username
@@ -54,7 +59,7 @@ export class MainGateway
   }
 
   /**
-   * 
+   *
    * @param client socket
    * @param data CreateRoomDto
    * @description Create room for user if he didn't join yet
@@ -66,16 +71,21 @@ export class MainGateway
   ) {
     const user = this.userService.get(data.userId);
     const room = this.roomService.createOrGet(user, data.roomSlug);
-    const withJoinRoom = this.roomService.join({linkSlug: room.linkSlug, userId: user.id});
+    const withJoinRoom = this.roomService.join({
+      linkSlug: room.linkSlug,
+      userId: user.id,
+    });
     const roomDto = this.roomService.toDto(withJoinRoom || room);
     const notifyIds = this.roomService.getUsersToNotify(roomDto);
     [...notifyIds, client.id].forEach((id) => {
-      this.server.to(id).emit(SentMessages.GET_OR_CREATE_ROOM, { room: roomDto });
+      this.server
+        .to(id)
+        .emit(SentMessages.GET_OR_CREATE_ROOM, { room: roomDto });
     });
   }
 
   /**
-   * 
+   *
    * @param client socket
    * @param data GetUserDto
    * @description Get exist user by id and update socketId
@@ -87,12 +97,9 @@ export class MainGateway
   ): void {
     this.logger.log(`${IncomingMessages.GET}:`, data);
     try {
-      // const room = this.roomService.getFromLink(data.roomSlug);
       const user = this.userService.getAndUpdate(data.userId, client.id);
-      // const roomDto = this.roomService.toDto(room);
       client.emit(SentMessages.GET, {
         user,
-        // room: roomDto,
       });
     } catch (e) {
       if (e.message === ERRORS.NUI) {
@@ -123,7 +130,7 @@ export class MainGateway
     this.logger.log(`${IncomingMessages.TEAM_CHANGE}: ${data}`);
     const room = this.roomService.get(data.roomId);
     if (!room) {
-      throw new BadRequestException('Комнаты не существует'); 
+      throw new BadRequestException('Комнаты не существует');
     }
     this.teamService.move(room.teamsGroup, data.userId, data.teamId);
     const newRoom = this.roomService.get(data.roomId);
@@ -131,6 +138,27 @@ export class MainGateway
     const notifyIds = this.roomService.getUsersToNotify(roomDto);
     notifyIds.forEach((id) => {
       this.server.to(id).emit(SentMessages.TEAM_CHANGE, { newRoom: roomDto });
+    });
+  }
+
+  @SubscribeMessage(IncomingMessages.THEME_CHANGE)
+  handleThemeChange(client: Socket, data: ChangeThemeDto) {
+    this.logger.log(`${IncomingMessages.TEAM_CHANGE}: ${data}`);
+    const user = this.userService.getBySocketId(client.id);
+    const room = this.roomService.getFromLink(data.linkSlug);
+    const isOwner = this.roomService.checkIsOwner(room, user.id);
+    if (!isOwner) {
+      client.emit(SentMessages.THEME_CHANGE, {
+        error: 'non_owner',
+      });
+      return;
+    }
+
+    const newRoom = this.roomService.changeTheme(room, data.themeId);
+    const roomDto = this.roomService.toDto(newRoom);
+    const notifyIds = this.roomService.getUsersToNotify(roomDto);
+    notifyIds.forEach((id) => {
+      this.server.to(id).emit(SentMessages.THEME_CHANGE, { newThemeId: newRoom.selectedThemeId });
     });
   }
 
@@ -145,7 +173,7 @@ export class MainGateway
       if (user) {
         this.userService.changeStatus(user.id, UserStatus.DISCONNECTED);
       }
-    } catch (e) { }
+    } catch (e) {}
   }
 
   handleConnection(client: Socket, ...args: any[]) {
