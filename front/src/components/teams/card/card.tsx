@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { VerticalContainer } from "../../common/common";
 import { FC } from "react";
 import { COLORS } from "../../../helpers/colors";
-import { IUser } from "../../../api/user/model";
+import { IUser, UserStatus } from "../../../api/user/model";
 import { Button } from "../../button/button";
 import { AddIcon } from "../../../icons/plus";
 
@@ -58,13 +58,15 @@ const StyledWrapper = styled(VerticalContainer)`
 interface IElementProps {
   isSelf: boolean;
   text: string;
+  isActive: boolean;
 }
 
-const ListElement: FC<IElementProps> = ({isSelf, text}) => {
+const ListElement: FC<IElementProps> = ({isSelf, text, isActive}) => {
   const renderedText = isSelf ? text + ' (you)' : '';
   const styles = {
     paddingBottom: '0,6rem',
     fontWeight: isSelf ? 800 : 400,
+    color: isActive ? 'red' : 'inherit',
   }
   return (
     <p style={styles}>
@@ -87,7 +89,7 @@ export const Card: FC<IProps> = ({
       return (
         <StyledList>
           {elements?.map((el) => (
-            <ListElement isSelf={el.id === userId} text={el.name!} key={el.name} />
+            <ListElement isActive={el.status === UserStatus.ACTIVE} isSelf={el.id === userId} text={el.name!} key={el.name} />
           ))}
         </StyledList>
       );

@@ -196,7 +196,7 @@ export class MainGateway
     const roomDto = this.roomService.toDto(newRoom);
     const notifyIds = this.roomService.getUsersToNotify(roomDto);
     notifyIds.forEach((id) => {
-      this.server.to(id).emit(SentMessages.START_GAME, { started: true, remainTime });
+      this.server.to(id).emit(SentMessages.START_GAME, { ...roomDto, started: true, remainTime });
     });
 
     this.addTimeout(room.id);
@@ -206,16 +206,14 @@ export class MainGateway
   handleNextWordStart(client: Socket, data: NextWordDto) {
     const user = this.userService.getBySocketId(client.id);
     const room = this.roomService.getFromLink(data.linkSlug);
-
+    room.words.push(data.wordId);
     const nextWord = this.themeService.getNext(room.selectedThemeId, room.words)
-    const lastWord = room.words.at(-1);
     const roomDto = this.roomService.toDto(room);
 
-    const restUsersId = this.roomService.getUsersToNotify(roomDto);
-    restUsersId.filter((id) => id !== user.id).forEach((id) => {
-      this.server.to(id).emit(SentMessages.NEXT_WORD, { lastWord });
+    const notifyIds = this.roomService.getUsersToNotify(roomDto);
+    notifyIds.forEach((id) => {
+      this.server.to(id).emit(SentMessages.NEXT_WORD, { nextWord });
     });
-    this.server.to(user.id).emit(SentMessages.NEXT_WORD, { nextWord });
   }
 
   afterInit(server: Server) {

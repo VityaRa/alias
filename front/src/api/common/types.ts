@@ -35,3 +35,8 @@ export interface StartGameResult {
   started: boolean;
   remainTime: number | null;
 }
+
+export interface EndGameResult {
+  started: boolean;
+  remainTime: number;
+}

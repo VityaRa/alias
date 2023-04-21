@@ -28,6 +28,7 @@ export class RoomRepository {
       startedTime: null,
       started: false,
       words: [],
+      prevPlayerId: null,
       playedUsers: [],
     }
     this.roomMap[room.id] = room;

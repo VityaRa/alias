@@ -11,6 +11,7 @@ export interface RoomModel {
   started: boolean;
   startedTime: number | null;
   words: string[];
+  prevPlayerId: string | null;
   playedUsers: string[];
 }
 

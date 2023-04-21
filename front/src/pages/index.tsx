@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
+  EndGameResult,
   GetOrCreateRoom,
   GetUserResult,
   StartGameResult
@@ -53,16 +54,22 @@ export const Page = ({ Component }: IProps) => {
     updateRoomState(data)
   };
 
+  const handleEndGame = (data: EndGameResult) => {
+    updateRoomState(data)
+  }
+
   useEffect(() => {
     socket.on(IncomingMessages.GET, handleGet);
     socket.on(IncomingMessages.LOGIN, handleGet);
     socket.on(IncomingMessages.GET_OR_CREATE_ROOM, handleGetOrCreateRoom);
     socket.on(IncomingMessages.START_GAME, handleStartGame);
+    socket.on(IncomingMessages.END_GAME, handleEndGame);
     return () => {
       socket.off(IncomingMessages.GET, handleGet);
       socket.off(IncomingMessages.LOGIN, handleGet);
       socket.off(IncomingMessages.GET_OR_CREATE_ROOM, handleGetOrCreateRoom);
       socket.off(IncomingMessages.START_GAME, handleStartGame);
+      socket.on(IncomingMessages.END_GAME, handleEndGame);
     };
   }, []);
 

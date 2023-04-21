@@ -7,6 +7,7 @@ export enum SentMessages {
   THEME_CHANGE = 'room:change_theme',
   START_GAME = 'game:start_game',
   NEXT_WORD = 'game:next_word',
+  END_GAME = 'game:end_game',
 }
 
 export enum DefaultMessages {
@@ -23,4 +24,5 @@ export enum IncomingMessages {
   THEME_CHANGE = 'sent:room:change_theme',
   START_GAME = 'sent:game:start_game',
   NEXT_WORD = 'sent:game:next_word',
+  END_GAME = 'sent:game:end_game',
 }

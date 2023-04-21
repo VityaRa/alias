@@ -38,4 +38,14 @@ export class TeamService {
   setNextActivePlayer(teamGroup: string, prevActiveUserId: string) {
     this.teamRepository.setNextActivePlayer(teamGroup, prevActiveUserId);
   }
+
+  getPlayersCount(teams: TeamDto[]) {
+    let count = 0;
+    teams.forEach((t) => {
+      if (t.type === TeamType.PLAYABLE) {
+        count += t.participants.length;
+      }
+    })
+    return count;
+  }
 }

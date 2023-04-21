@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { RoomRepository } from '../storage/room.repository';
-import { UserDto } from 'src/dto/user';
+import { UserDto, UserStatus } from 'src/dto/user';
 import { JoinRoomDto, RoomDto, RoomModel } from 'src/dto/room';
 import { TeamType } from 'src/dto/team';
 import { TeamService } from '../team/team.service';
@@ -41,6 +41,7 @@ export class RoomService {
   startGame(roomModel: RoomModel) {
     roomModel.startedTime = Date.now();
     roomModel.started = true;
+    this.setDefaultActivePlayer(roomModel);
     return roomModel;
   }
 
@@ -59,6 +60,12 @@ export class RoomService {
       throw new UnauthorizedException(ERRORS.NRFL);
     }
     return roomByLink;
+  }
+
+  setDefaultActivePlayer(roomModel: RoomModel) {
+    const players = this.teamService.getParticipantsIds(roomModel.teamsGroup);
+    const userId = players[Math.floor((Math.random()*players.length))];
+    this.userService.changeStatus(userId, UserStatus.ACTIVE);
   }
 
   checkIsOwner(room: RoomModel, userId: string) {
@@ -142,10 +149,40 @@ export class RoomService {
     return MINUTE - (now - room.startedTime);
   }
 
-  getActiveAndRestIds(room: RoomDto) { }
+  // getNextUserId(roomModel: RoomModel) {
+  //   const roomDto = this.toDto(roomModel);
+  //   if (!roomModel.prevPlayerId) {
+  //     const newId = roomDto.teamsGroup[0].participants[0].id;
+  //     roomModel.prevPlayerId = newId
+  //     roomModel.playedUsers.push(newId);
+  //     return roomModel.prevPlayerId;
+  //   }
 
-  setNextActivePlayer(room: RoomModel, prevActiveUserId: string) {
+  //   let userId = null;
+  //   roomDto.teamsGroup.forEach((t) => {
+  //     if (t.type === TeamType.VIEWERS) {
+  //       return;
+  //     }
+  //     const ids = t.participants.map((p) => p.id);
+  //     if (!ids.includes(roomModel.prevPlayerId)) {
+  //       const userIndex = ids.indexOf()
+  //       roomModel.prevPlayerId = t.participants.filter()
+  //     }
+  //   })
+  //   return userId;
+  // }
 
-    // this.teamService.setNextActivePlayer(room.teamsGroup, prevActiveUserId);
-  }
+
+  // setNextActivePlayer(room: RoomModel, prevActiveUserId?: string) {
+  //   const roomDto = this.toDto(room);
+  //   if (!prevActiveUserId) {
+  //     const newActiveUserId = roomDto.teamsGroup.filter((t) => t.type !== TeamType.VIEWERS)[0].participants[0].id;
+  //     this.userService.changeStatus(newActiveUserId, UserStatus.ACTIVE);
+  //     return room;
+  //   }
+
+  //   const { currentTeamId, nextTeamId } = this.getActiveAndNextUserTeam(roomDto, prevActiveUserId);
+  //   // this.teamService
+  //   // this.teamService.setNextActivePlayer(room.teamsGroup, prevActiveUserId);
+  // }
 }
