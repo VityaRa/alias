@@ -13,3 +13,8 @@ export const ErrorText = styled.p`
   text-align: left;
   margin-bottom: 0.5rem;
 `
+
+export const DefaultText = styled.p`
+  font-size: 1rem;
+  font-weight: 400;
+`

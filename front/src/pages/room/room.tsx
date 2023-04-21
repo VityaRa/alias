@@ -1,46 +1,56 @@
-import { useContext, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import themeController from '../../api/theme/controller';
-import { ITheme } from '../../api/theme/model';
-import { VerticalContainer } from '../../components/common/common';
-import { InviteLink } from '../../components/inviteLink/inviteLink';
-import { Login } from '../../components/login/login';
-import { StartGame } from '../../components/startGame/startGame';
-import { Teams } from '../../components/teams/teams';
-import { ThemeSelector } from '../../components/themeSelector/themeSelector';
-import { RoomContext } from '../../contexts/RoomContext';
-import { SocketContext } from '../../contexts/SocketContext';
-import { UserContext } from '../../contexts/UserContext';
+import { useContext, useEffect } from "react";
+import themeController from "../../api/theme/controller";
+import { ITheme } from "../../api/theme/model";
+import { VerticalContainer } from "../../components/common/common";
+import { GameButtons } from "../../components/gameButtons/gameButtons";
+import { InviteLink } from "../../components/inviteLink/inviteLink";
+import { Login } from "../../components/login/login";
+import { StartGame } from "../../components/startGame/startGame";
+import { Teams } from "../../components/teams/teams";
+import { ThemeSelector } from "../../components/themeSelector/themeSelector";
+import { Timer } from "../../components/timer/timer";
+import { Words } from "../../components/words/words";
+import { RoomContext } from "../../contexts/RoomContext";
+import { UserContext } from "../../contexts/UserContext";
 
 export const RoomPage = () => {
-  const params = useParams();
-  const { updateRoomState, id: roomId } = useContext(RoomContext);
-  const { socket } = useContext(SocketContext);
-  const navigate = useNavigate();
-  const {id: userId, name, updateUserState} = useContext(UserContext);
+  const {
+    updateRoomState,
+    id: roomId,
+    owner,
+    startGame,
+    started
+  } = useContext(RoomContext);
+  const { id: userId } = useContext(UserContext);
   // add logic to check room
   const getThemes = async () => {
     const labels = await themeController.getLabels();
-    updateRoomState({themes: labels as ITheme[]});
-  }
+    updateRoomState({ themes: labels as ITheme[] });
+  };
 
   useEffect(() => {
     getThemes();
-  }, [])
+  }, []);
 
   if (!roomId || !userId) {
-    return <Login withJoin />
+    return <Login withJoin />;
   }
 
   return (
     <VerticalContainer>
-      <div style={{color: '#ffffff'}}>
-        USERNAME: {name}
-      </div>
       <InviteLink />
       <ThemeSelector />
       <Teams />
-      <StartGame />
+      {started && (
+        <>
+          <Words />
+          <GameButtons />
+          <Timer />
+        </>
+      )}
+      {!started && (
+        <StartGame isOwner={owner?.id === userId} onClick={() => startGame()} />
+      )}
     </VerticalContainer>
-  )
-}
+  );
+};

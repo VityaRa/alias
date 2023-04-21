@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserDto } from 'src/dto/user';
 import { TeamRepository } from '../storage/team.repository';
+import { TeamDto, TeamType } from 'src/dto/team';
 
 @Injectable()
 export class TeamService {
@@ -28,5 +29,13 @@ export class TeamService {
 
   debug() {
     return this.teamRepository.debug();
+  }
+
+  enoughPlayers(teams: TeamDto[]) {
+    return teams.filter((t) => t.type !== TeamType.VIEWERS && t.participants.length >= 2).length === 2; 
+  }
+
+  setNextActivePlayer(teamGroup: string, prevActiveUserId: string) {
+    this.teamRepository.setNextActivePlayer(teamGroup, prevActiveUserId);
   }
 }

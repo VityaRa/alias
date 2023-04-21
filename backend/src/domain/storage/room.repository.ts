@@ -25,6 +25,10 @@ export class RoomRepository {
       linkSlug,
       owner: userDto,
       selectedThemeId: themeId,
+      startedTime: null,
+      started: false,
+      words: [],
+      playedUsers: [],
     }
     this.roomMap[room.id] = room;
     return room;

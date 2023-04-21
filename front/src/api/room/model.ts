@@ -6,4 +6,6 @@ export interface IRoom {
   id: string;
   linkSlug: string;
   owner: IUser,
+  started: boolean;
+  remainTime: number | null;
 }

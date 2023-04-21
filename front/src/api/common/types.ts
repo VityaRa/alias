@@ -30,3 +30,8 @@ export interface LoginUserResult {
   user: IUser,
   error?: string;
 }
+
+export interface StartGameResult {
+  started: boolean;
+  remainTime: number | null;
+}

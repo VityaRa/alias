@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { Button } from '../button/button'
 import { PlayIcon } from '../../icons/play'
 import { COLORS } from '../../helpers/colors'
+import { FC } from 'react'
 
 const StyledButton = styled(Button)`
   position: absolute;
@@ -21,8 +22,16 @@ const StyledButton = styled(Button)`
   }
 `
 
-export const StartGame = () => {
+interface IProps {
+  isOwner: boolean;
+  onClick: () => void;
+}
+
+export const StartGame: FC<IProps> = ({isOwner, onClick}) => {
+  if (!isOwner) {
+    return null;
+  }
   return (
-    <StyledButton icon={<PlayIcon />} disabled>startGame</StyledButton>
+    <StyledButton icon={<PlayIcon />} onClick={() => onClick()} disabled={!isOwner}>startGame</StyledButton>
   )
 }

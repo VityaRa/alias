@@ -1,7 +1,7 @@
 export enum UserStatus {
-  'ACTIVE',
-  'READY',
-  'DISCONNECTED'
+  ACTIVE = 'ACTIVE',
+  READY = 'READY',
+  DISCONNECTED = 'DISCONNECTED',
 }
 
 export interface UserDto { 

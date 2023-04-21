@@ -11,6 +11,8 @@ interface IProps {
   elements?: IUser[];
   darkenTitle?: boolean;
   onClick: () => void;
+  userId: string;
+  gameStarted: boolean;
 }
 
 const StyledCard = styled(VerticalContainer)`
@@ -37,9 +39,6 @@ const StyledList = styled.ul`
   padding-bottom: 0;
 `;
 
-const StyledElement = styled.li`
-  padding-bottom: 0.6rem;
-`;
 
 const StyledButton = styled(Button)`
   width: 2.5rem !important;
@@ -56,10 +55,31 @@ const StyledWrapper = styled(VerticalContainer)`
   justify-content: center;
 `;
 
+interface IElementProps {
+  isSelf: boolean;
+  text: string;
+}
+
+const ListElement: FC<IElementProps> = ({isSelf, text}) => {
+  const renderedText = isSelf ? text + ' (you)' : '';
+  const styles = {
+    paddingBottom: '0,6rem',
+    fontWeight: isSelf ? 800 : 400,
+  }
+  return (
+    <p style={styles}>
+      {renderedText}
+    </p>
+  )
+}
+
+
 export const Card: FC<IProps> = ({
   title,
   elements,
   onClick,
+  userId,
+  gameStarted,
   darkenTitle = true
 }) => {
   const renderContent = () => {
@@ -67,7 +87,7 @@ export const Card: FC<IProps> = ({
       return (
         <StyledList>
           {elements?.map((el) => (
-            <StyledElement key={el.name}>{el.name}</StyledElement>
+            <ListElement isSelf={el.id === userId} text={el.name!} key={el.name} />
           ))}
         </StyledList>
       );
@@ -80,7 +100,7 @@ export const Card: FC<IProps> = ({
     );
   };
   return (
-    <StyledCard onClick={() => onClick()}>
+    <StyledCard onClick={!gameStarted ? () => onClick() : () => {}}>
       <StyledTitle darkenTitle={darkenTitle}>{title}</StyledTitle>
       {renderContent()}
     </StyledCard>

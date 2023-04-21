@@ -1,6 +1,8 @@
+import { useContext, useEffect, useState } from 'react';
 import { COLORS } from '../helpers/colors';
 import { WithChildrens } from '../helpers/types';
 import styled from 'styled-components';
+import { useGameState } from '../helpers/useGameState';
 
 const StyledMain = styled.main`
 	background-color: ${COLORS.BACKROUND};
@@ -8,16 +10,15 @@ const StyledMain = styled.main`
 	width: 100%;
 	display: flex;
 	justify-content: center;
-	align-items: center;
 `
 
-type MainLayoutProps = {
-	view?: boolean;
-}
+type MainLayoutProps = {}
 
 export const Main: WithChildrens<MainLayoutProps> = ({children}) => {
+	const { isStarted } = useGameState();
+
   return (
-    <StyledMain>
+    <StyledMain style={{alignItems: !isStarted ? 'center' : 'flex-start'}}>
 			{children}
 		</StyledMain>
   )

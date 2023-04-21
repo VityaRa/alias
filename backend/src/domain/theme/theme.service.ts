@@ -17,4 +17,8 @@ export class ThemeService {
   getDefault() {
     return this.getList()[0];
   }
+
+  getNext(themeId: string, usedWords: string[]) {
+    return this.themeRepository.getNextWordTheme(themeId, usedWords);
+  }
 }

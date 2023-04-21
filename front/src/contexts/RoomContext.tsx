@@ -14,6 +14,7 @@ export interface RoomActions {
   changeTeam: (teamId: string) => void;
   getRoomLink: (slug: string) => string;
   changeTheme: (themeId: string) => void;
+  startGame: () => void;
 }
 
 export interface RoomState {
@@ -25,6 +26,8 @@ export interface RoomState {
   viewers: Array<IUser>;
   id?: string;
   owner: IUser | null;
+  started: boolean;
+  remainTime: number | null;
 }
 
 export type RoomContextType = RoomActions & RoomState;
@@ -41,6 +44,8 @@ const defaultState: RoomState = {
   selectedThemeId: "",
   viewers: [],
   owner: null,
+  started: false,
+  remainTime: 0,
 };
 
 export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
@@ -65,6 +70,10 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
     updateRoomState({selectedThemeId: newThemeId});
   }
 
+  const startGame = () => {
+    socket.emit(SentMessages.START_GAME, { linkSlug: state.linkSlug });
+  }
+
   const getRoomLink = (slug: string) => {
     return window.location.hostname + '/' + slug;
   }
@@ -74,6 +83,7 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
     changeTeam,
     getRoomLink,
     changeTheme,
+    startGame,
   };
 
   useEffect(() => {

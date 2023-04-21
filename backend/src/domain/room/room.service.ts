@@ -13,6 +13,9 @@ import { UserService } from '../user/user.service';
 import { ERRORS } from '../errors/codes';
 import { ThemeService } from '../theme/theme.service';
 
+const MINUTE = 60 * 1000;
+
+
 @Injectable()
 export class RoomService {
   constructor(
@@ -20,7 +23,7 @@ export class RoomService {
     private teamService: TeamService,
     private userService: UserService,
     private themeService: ThemeService,
-  ) {}
+  ) { }
 
   get(roomId: string) {
     return this.roomRepository.getById(roomId);
@@ -32,6 +35,18 @@ export class RoomService {
       throw new NotFoundException('not_found_theme');
     }
     roomModel.selectedThemeId = themeId;
+    return roomModel;
+  }
+
+  startGame(roomModel: RoomModel) {
+    roomModel.startedTime = Date.now();
+    roomModel.started = true;
+    return roomModel;
+  }
+
+  endGame(roomModel: RoomModel) {
+    roomModel.startedTime = null;
+    roomModel.started = false;
     return roomModel;
   }
 
@@ -71,7 +86,9 @@ export class RoomService {
     try {
       const teamsDto = this.teamService.getDtoFromGroup(room.teamsGroup);
       const withUsersTeamsDto = this.userService.addUserToDto(teamsDto);
-      return { ...room, teamsGroup: withUsersTeamsDto };
+      const remainTime = this.getRemainTime(room);
+      const { startedTime, ...restRoom } = room;
+      return { ...restRoom, teamsGroup: withUsersTeamsDto, remainTime };
     } catch (e) {
       console.log(e);
       return null;
@@ -109,5 +126,26 @@ export class RoomService {
 
   debug() {
     return this.roomRepository.debug();
+  }
+  
+  canStart(room: RoomModel) {
+    const dto = this.toDto(room);
+    const isEnoughPlayers = this.teamService.enoughPlayers(dto.teamsGroup);
+    return isEnoughPlayers;
+  }
+
+  getRemainTime(room: RoomModel) {
+    if (!room.started) {
+      return 0;
+    }
+    const now = Date.now();
+    return MINUTE - (now - room.startedTime);
+  }
+
+  getActiveAndRestIds(room: RoomDto) { }
+
+  setNextActivePlayer(room: RoomModel, prevActiveUserId: string) {
+
+    // this.teamService.setNextActivePlayer(room.teamsGroup, prevActiveUserId);
   }
 }

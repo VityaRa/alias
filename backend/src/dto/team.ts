@@ -10,6 +10,7 @@ export interface TeamModel {
   participants: string[],
   id: string;
   type: TeamType,
+  points: number;
 }
 
 export interface TeamDto {
