@@ -19,7 +19,8 @@ export const RoomPage = () => {
     id: roomId,
     owner,
     startGame,
-    started
+    started,
+    remainTime,
   } = useContext(RoomContext);
   const { id: userId } = useContext(UserContext);
   // add logic to check room
@@ -45,7 +46,7 @@ export const RoomPage = () => {
         <>
           <Words />
           <GameButtons />
-          <Timer />
+          <Timer/>
         </>
       )}
       {!started && (

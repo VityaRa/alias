@@ -61,11 +61,7 @@ export class ThemeRepository {
 
   getNextWordTheme(themeId: string, usedWords?: string[]) {
     const theme = this.themes.find((t) => t.id === themeId);
-    if (!theme) {
-      return [];
-    }
-
-    const notUsedWords = theme.words.filter((w) => !usedWords.includes(w.value));
+    const notUsedWords = theme.words.filter((w) => !usedWords.includes(w.id));
     const shuffled = this.shuffleWords(notUsedWords);
     return shuffled[0];
   }
@@ -77,4 +73,16 @@ export class ThemeRepository {
     }
     return array;
   }
+
+  getById(id: string) {
+    return this.themes.find((t) => t.id === id);
+  }
+
+  toDto(themeId: string, ids: string[]) {
+    const theme = this.getById(themeId);
+    return ids.map((id) => {
+      return theme.words.find((w) => w.id === id);
+    })
+  }
 }
+

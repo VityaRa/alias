@@ -1,8 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { ITeam } from "../api/team/model";
 import { ITheme } from "../api/theme/model";
 import { IUser } from "../api/user/model";
-import { IWord } from "../api/word/model";
+import { IWord, WordStatus } from "../api/word/model";
 import { WithChildrens } from "../helpers/types";
 import { SocketContext } from "./SocketContext";
 import { IncomingMessages, SentMessages } from "../helpers/events";
@@ -15,6 +15,9 @@ export interface RoomActions {
   getRoomLink: (slug: string) => string;
   changeTheme: (themeId: string) => void;
   startGame: () => void;
+  nextWord: (status: WordStatus) => void;
+  setNextWord: (word: IWord) => void;
+
 }
 
 export interface RoomState {
@@ -78,12 +81,24 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
     return window.location.hostname + '/' + slug;
   }
 
+  const nextWord = (status: WordStatus) => {
+    socket.emit(SentMessages.NEXT_WORD, { status, linkSlug: state.linkSlug, wordId: state.words.at(-1)?.id });
+  }
+
+  const setNextWord = (word: IWord) => {
+    console.log(word);
+    console.log(state.words);
+    setState((prev) => ({...prev, words: [...prev.words, word]}))
+  }
+
   const actions = {
     updateRoomState,
     changeTeam,
     getRoomLink,
     changeTheme,
     startGame,
+    nextWord,
+    setNextWord,
   };
 
   useEffect(() => {

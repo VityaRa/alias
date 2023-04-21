@@ -4,6 +4,7 @@ import {
   EndGameResult,
   GetOrCreateRoom,
   GetUserResult,
+  NextWordResult,
   StartGameResult
 } from "../api/common/types";
 import { RoomContext } from "../contexts/RoomContext";
@@ -23,7 +24,7 @@ export const Page = ({ Component }: IProps) => {
   const { socket, error, updateState, getOrCreateRoom } =
     useContext(SocketContext);
   const { updateUserState } = useContext(UserContext);
-  const { updateRoomState } = useContext(RoomContext);
+  const { updateRoomState, setNextWord } = useContext(RoomContext);
 
   useEffect(() => {
     if (error) {
@@ -58,18 +59,26 @@ export const Page = ({ Component }: IProps) => {
     updateRoomState(data)
   }
 
+  const handleNextWord = (data: NextWordResult) => {
+    console.log('GOT NEXT WORD');
+    
+    setNextWord(data.nextWord)
+  }
+
   useEffect(() => {
     socket.on(IncomingMessages.GET, handleGet);
     socket.on(IncomingMessages.LOGIN, handleGet);
     socket.on(IncomingMessages.GET_OR_CREATE_ROOM, handleGetOrCreateRoom);
     socket.on(IncomingMessages.START_GAME, handleStartGame);
     socket.on(IncomingMessages.END_GAME, handleEndGame);
+    socket.on(IncomingMessages.NEXT_WORD, handleNextWord);
     return () => {
       socket.off(IncomingMessages.GET, handleGet);
       socket.off(IncomingMessages.LOGIN, handleGet);
       socket.off(IncomingMessages.GET_OR_CREATE_ROOM, handleGetOrCreateRoom);
       socket.off(IncomingMessages.START_GAME, handleStartGame);
-      socket.on(IncomingMessages.END_GAME, handleEndGame);
+      socket.off(IncomingMessages.END_GAME, handleEndGame);
+      socket.off(IncomingMessages.NEXT_WORD, handleNextWord);
     };
   }, []);
 

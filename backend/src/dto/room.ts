@@ -1,4 +1,5 @@
 import { TeamDto } from "./team";
+import { WordDto } from "./theme";
 import { UserDto } from "./user";
 import { WordStatus } from "./word";
 
@@ -23,6 +24,7 @@ export interface RoomDto {
   selectedThemeId: string;
   started: boolean;
   remainTime: number | null;
+  words: WordDto[];
 }
 
 export interface JoinRoomDto {

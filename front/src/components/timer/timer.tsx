@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { DefaultText } from '../typography'
 import styled from 'styled-components'
+import { RoomContext } from '../../contexts/RoomContext'
 
 const STATUS = {
   STARTED: 'Started',
@@ -20,9 +21,10 @@ const TimerText = styled(DefaultText)`
 `
 
 export const Timer = () => {
-  const [secondsRemaining, setSecondsRemaining] = useState(INITIAL_COUNT)
-  const [status, setStatus] = useState(STATUS.STOPPED)
+  const { remainTime } = useContext(RoomContext);
+  const [millisRemaining, setMillisRemaining] = useState(remainTime || 0)
 
+  const secondsRemaining = millisRemaining / 1000;
   const secondsToDisplay = secondsRemaining % 60
   const minutesRemaining = (secondsRemaining - secondsToDisplay) / 60
   const minutesToDisplay = minutesRemaining % 60
@@ -30,14 +32,11 @@ export const Timer = () => {
   useInterval(
     () => {
       if (secondsRemaining > 0) {
-        setSecondsRemaining(secondsRemaining - 1)
-      } else {
-        setStatus(STATUS.STOPPED)
+        setMillisRemaining(millisRemaining - 1000)
       }
     },
-    status === STATUS.STARTED ? 1000 : null,
+    1000,
   )
-
 
   return (
     <AbsoluteContainer>
@@ -67,4 +66,4 @@ function useInterval(callback: any, delay: number | null) {
   }, [delay])
 }
 
-const twoDigits = (num: number) => String(num).padStart(2, '0')
+const twoDigits = (num: number) => String(Math.trunc(num)).padStart(2, '0')

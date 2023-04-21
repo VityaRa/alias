@@ -1,6 +1,7 @@
 import { AxiosResponse } from "axios";
 import { IRoom } from "../room/model";
 import { IUser } from "../user/model";
+import { IWord } from "../word/model";
 
 export interface ApiResponse<T> {
   data: T;
@@ -39,4 +40,8 @@ export interface StartGameResult {
 export interface EndGameResult {
   started: boolean;
   remainTime: number;
+}
+
+export interface NextWordResult {
+  nextWord: IWord,
 }

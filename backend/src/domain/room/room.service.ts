@@ -48,6 +48,7 @@ export class RoomService {
   endGame(roomModel: RoomModel) {
     roomModel.startedTime = null;
     roomModel.started = false;
+    roomModel.words = [];
     return roomModel;
   }
 
@@ -93,9 +94,10 @@ export class RoomService {
     try {
       const teamsDto = this.teamService.getDtoFromGroup(room.teamsGroup);
       const withUsersTeamsDto = this.userService.addUserToDto(teamsDto);
+      const words = this.themeService.toDto(room.selectedThemeId, room.words);
       const remainTime = this.getRemainTime(room);
       const { startedTime, ...restRoom } = room;
-      return { ...restRoom, teamsGroup: withUsersTeamsDto, remainTime };
+      return { ...restRoom, teamsGroup: withUsersTeamsDto, remainTime, words };
     } catch (e) {
       console.log(e);
       return null;
