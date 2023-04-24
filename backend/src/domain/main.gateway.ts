@@ -108,6 +108,9 @@ export class MainGateway
     this.logger.log(`${IncomingMessages.GET}:`, data);
     try {
       const user = this.userService.getAndUpdate(data.userId, client.id);
+      if (user.status === UserStatus.DISCONNECTED) {
+        this.userService.changeStatus(user.id, UserStatus.READY);
+      }
       client.emit(SentMessages.GET, {
         user,
       });
@@ -186,12 +189,12 @@ export class MainGateway
     }
 
     const canStart = this.roomService.canStart(room);
-    // if (!canStart) {
-    //   client.emit(SentMessages.START_GAME, {
-    //     error: 'Недостаточно игроков (минимум 2 игрока в каждой команде)',
-    //   });
-    //   return;
-    // }
+    if (!canStart) {
+      client.emit(SentMessages.START_GAME, {
+        error: 'Недостаточно игроков или не выбран активный игрок',
+      });
+      return;
+    }
     const newRoom = this.roomService.startGame(room);
     const remainTime = this.roomService.getRemainTime(room);
     const nextWord = this.themeService.getNext(room.selectedThemeId, room.words)
@@ -256,7 +259,7 @@ export class MainGateway
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
     try {
-      const user = this.userService.get(client.id);
+      const user = this.userService.getBySocketId(client.id);
       if (user) {
         this.userService.changeStatus(user.id, UserStatus.DISCONNECTED);
       }

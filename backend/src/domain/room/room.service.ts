@@ -149,7 +149,9 @@ export class RoomService {
   canStart(room: RoomModel) {
     const dto = this.toDto(room);
     const isEnoughPlayers = this.teamService.enoughPlayers(dto.teamsGroup);
-    return isEnoughPlayers;
+    const players = this.teamService.getParticipantsIds(room.teamsGroup);
+    const hasActiveUser = this.hasActiveUser(players);
+    return isEnoughPlayers && hasActiveUser;
   }
 
   getRemainTime(room: RoomModel) {

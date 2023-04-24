@@ -23,6 +23,6 @@ export class RoomController {
   checkForEmptyRooms() {
     console.log('Checking for empty rooms...');
     this.roomService.removeEmptyRooms();
-    console.log('Finished for empty rooms...');
+    console.log('Finished cleaning rooms');
   }
 }
