@@ -178,25 +178,25 @@ export class RoomService {
   }
 
   deleteRoom(room: RoomModel) {
-    this.roomRepository.deleteById(room.id);
-    this.teamService.deleteById(room.teamsGroup);
     this.changeActiveUser(room, '', true);
+    this.teamService.deleteById(room.teamsGroup);
+    this.roomRepository.deleteById(room.id);
   }
 
-  removeEmptyRooms() {
+  removeEmptyRooms(socketIds: string[]) {
     let deletedCount = 0;
     const roomMap = this.roomRepository.getAll();
     for (const id in roomMap) {
       const room = roomMap[id];
-      const playersCount = this.teamService.getParticipantsIds(room.teamsGroup).length;
+      const players = this.teamService.getParticipantsIds(room.teamsGroup);
+      const activePlayers = players.filter((pId) => socketIds.includes(pId));
       const now = Date.now();
       const removeAfter = room.createdAt.getTime() + HOUR;
-      if (playersCount === 0 && now > removeAfter) {
+      if (activePlayers.length === 0 && now > removeAfter) {
         this.deleteRoom(room);
         deletedCount += 1;
       }
     }
     console.log(`Removed ${deletedCount} rooms`);
-    
   }
 }

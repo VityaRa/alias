@@ -17,12 +17,4 @@ export class RoomController {
     }
     return result
   }
-
-  
-  @Cron('0 * * * *')
-  checkForEmptyRooms() {
-    console.log('Checking for empty rooms...');
-    this.roomService.removeEmptyRooms();
-    console.log('Finished cleaning rooms');
-  }
 }

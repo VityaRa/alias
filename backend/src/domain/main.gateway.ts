@@ -283,4 +283,13 @@ export class MainGateway
 
     this.timeouts[roomId] = timeout;
   }
+
+    
+  @Cron('* * * * *')
+  checkForEmptyRooms() {
+    console.log('Checking for empty rooms...');
+    const socketIds = Object.keys(this.server.sockets);
+    this.roomService.removeEmptyRooms(socketIds);
+    console.log('Finished cleaning rooms');
+  }
 }
