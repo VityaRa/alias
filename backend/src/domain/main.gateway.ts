@@ -179,18 +179,18 @@ export class MainGateway
     const isOwner = this.roomService.checkIsOwner(room, user.id);
     if (!isOwner) {
       client.emit(SentMessages.START_GAME, {
-        error: 'non_owner',
+        error: 'Нет прав',
       });
       return;
     }
 
-    // const canStart = this.roomService.canStart(room);
-    // if (!canStart) {
-    //   client.emit(SentMessages.START_GAME, {
-    //     error: 'not_enough_players',
-    //   });
-    //   return;
-    // }
+    const canStart = this.roomService.canStart(room);
+    if (!canStart) {
+      client.emit(SentMessages.START_GAME, {
+        error: 'Недостаточно игроков (минимум 2 игрока в каждой команде)',
+      });
+      return;
+    }
     const newRoom = this.roomService.startGame(room);
     const remainTime = this.roomService.getRemainTime(room);
     const nextWord = this.themeService.getNext(room.selectedThemeId, room.words)

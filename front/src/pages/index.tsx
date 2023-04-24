@@ -21,17 +21,10 @@ interface IProps {
 export const Page = ({ Component }: IProps) => {
   const navigate = useNavigate();
   const params = useParams();
-  const { socket, error, updateState, getOrCreateRoom } =
+  const { socket, error, setError, updateState, getOrCreateRoom } =
     useContext(SocketContext);
   const { updateUserState } = useContext(UserContext);
   const { updateRoomState, setNextWord } = useContext(RoomContext);
-
-  useEffect(() => {
-    if (error) {
-      updateState({ error: null });
-      navigate(`/error?text=${error}`);
-    }
-  }, [error]);
 
   const handleGet = (data: GetUserResult) => {
     if (data?.error || !data.user) {
@@ -49,18 +42,34 @@ export const Page = ({ Component }: IProps) => {
   const handleGetOrCreateRoom = (data: GetOrCreateRoom) => {
     updateRoomState(data.room);
     navigate(`/${data.room.linkSlug}`);
+    setError(null);
   };
 
   const handleStartGame = (data: StartGameResult) => {
+    if (data.error) {
+      setError(data.error);
+      return;
+    }
     updateRoomState(data)
+    setError(null);
   };
 
   const handleEndGame = (data: EndGameResult) => {
-    updateRoomState(data)
+    if (data.error) {
+      setError(data.error);
+      return;
+    }
+    updateRoomState(data);
+    setError(null);
   }
 
   const handleNextWord = (data: NextWordResult) => {
+    if (data.error) {
+      setError(data.error);
+      return;
+    }
     setNextWord(data.nextWord)
+    setError(null);
   }
 
   useEffect(() => {

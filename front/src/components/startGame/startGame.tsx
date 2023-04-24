@@ -15,10 +15,14 @@ const StyledButton = styled(Button)`
   svg {
     width: 2.5rem;
     width: 2.5rem;
+    fill: ${COLORS.MAIN};
   }
 
   &:hover {
     background-color: ${COLORS.MAIN};
+    svg {
+      fill: ${COLORS.MAIN_WHITE};
+    }
   }
 `
 

@@ -22,26 +22,28 @@ export enum API_ERRORS {
   DEFAULT = 'error',
 }
 
-export interface GetOrCreateRoom {
+export interface ErrorType {
+  error?: string;
+}
+
+export interface GetOrCreateRoom extends ErrorType {
   room: IRoom,
-  error?: string;
 }
 
-export interface LoginUserResult {
+export interface LoginUserResult extends ErrorType {
   user: IUser,
-  error?: string;
 }
 
-export interface StartGameResult {
+export interface StartGameResult extends ErrorType {
   started: boolean;
   remainTime: number | null;
 }
 
-export interface EndGameResult {
+export interface EndGameResult extends ErrorType {
   started: boolean;
   remainTime: number;
 }
 
-export interface NextWordResult {
+export interface NextWordResult extends ErrorType {
   nextWord: IWord,
 }
