@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { RoomService } from './room.service';
+import { Cron } from '@nestjs/schedule';
 
 
 @Controller('room')

@@ -1,15 +1,20 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { RoomRepository } from '../storage/room.repository';
-import { UserDto } from 'src/dto/user';
+import { UserDto, UserStatus } from 'src/dto/user';
 import { JoinRoomDto, RoomDto, RoomModel } from 'src/dto/room';
 import { TeamType } from 'src/dto/team';
 import { TeamService } from '../team/team.service';
 import { UserService } from '../user/user.service';
 import { ERRORS } from '../errors/codes';
+import { ThemeService } from '../theme/theme.service';
+
+const MINUTE = 60 * 1000;
+const HOUR = MINUTE * 60;
 
 @Injectable()
 export class RoomService {
@@ -17,13 +22,37 @@ export class RoomService {
     private roomRepository: RoomRepository,
     private teamService: TeamService,
     private userService: UserService,
-  ) {}
+    private themeService: ThemeService,
+  ) { }
 
   get(roomId: string) {
     return this.roomRepository.getById(roomId);
   }
 
-  getFromLink(link: string) {;
+  changeTheme(roomModel: RoomModel, themeId: string) {
+    const themeExist = this.themeService.checkIfExists(themeId);
+    if (!themeExist) {
+      throw new NotFoundException('not_found_theme');
+    }
+    roomModel.selectedThemeId = themeId;
+    return roomModel;
+  }
+
+  startGame(roomModel: RoomModel) {
+    roomModel.startedTime = Date.now();
+    roomModel.started = true;
+    this.setDefaultActivePlayer(roomModel);
+    return roomModel;
+  }
+
+  endGame(roomModel: RoomModel) {
+    roomModel.startedTime = null;
+    roomModel.started = false;
+    roomModel.words = [];
+    return roomModel;
+  }
+
+  getFromLink(link: string) {
     if (!link) {
       throw new BadRequestException(ERRORS.NLE);
     }
@@ -32,6 +61,25 @@ export class RoomService {
       throw new UnauthorizedException(ERRORS.NRFL);
     }
     return roomByLink;
+  }
+
+  setDefaultActivePlayer(roomModel: RoomModel) {
+    const players = this.teamService.getParticipantsIds(roomModel.teamsGroup);
+    const hasActiveUser = this.hasActiveUser(players);
+    if (hasActiveUser) {
+      return;
+    }
+    const userId = players[Math.floor((Math.random()*players.length))];
+    this.userService.changeStatus(userId, UserStatus.ACTIVE);
+  }
+
+  hasActiveUser(ids: string[]) {
+    const users = ids.map((id) => this.userService.get(id));
+    return users.some((u) => u.status === UserStatus.ACTIVE);
+  }
+
+  checkIsOwner(room: RoomModel, userId: string) {
+    return room.owner.id === userId;
   }
 
   createOrGet(user: UserDto, link?: string) {
@@ -43,7 +91,8 @@ export class RoomService {
       const existRoom = this.getFromLink(link);
       return existRoom;
     } catch (e) {
-      const room = this.roomRepository.create(user);
+      const themeId = this.themeService.getDefault().id;
+      const room = this.roomRepository.create(user, themeId);
       const { id } = this.teamService.create(user);
       room.teamsGroup = id;
       return room;
@@ -54,7 +103,10 @@ export class RoomService {
     try {
       const teamsDto = this.teamService.getDtoFromGroup(room.teamsGroup);
       const withUsersTeamsDto = this.userService.addUserToDto(teamsDto);
-      return { ...room, teamsGroup: withUsersTeamsDto };
+      const words = this.themeService.toDto(room.selectedThemeId, room.words);
+      const remainTime = this.getRemainTime(room);
+      const { startedTime, ...restRoom } = room;
+      return { ...restRoom, teamsGroup: withUsersTeamsDto, remainTime, words };
     } catch (e) {
       console.log(e);
       return null;
@@ -86,13 +138,65 @@ export class RoomService {
     return room;
   }
 
-  emitEveryone() {}
-
   getUsersToNotify(room: RoomDto) {
     return room.teamsGroup.flatMap((t) => t.participants).map(u => u.socketId);
   }
 
   debug() {
     return this.roomRepository.debug();
+  }
+  
+  canStart(room: RoomModel) {
+    const dto = this.toDto(room);
+    const isEnoughPlayers = this.teamService.enoughPlayers(dto.teamsGroup);
+    const players = this.teamService.getParticipantsIds(room.teamsGroup);
+    const hasActiveUser = this.hasActiveUser(players);
+    return isEnoughPlayers && hasActiveUser;
+  }
+
+  getRemainTime(room: RoomModel) {
+    if (!room.started) {
+      return 0;
+    }
+    const now = Date.now();
+    return MINUTE - (now - room.startedTime);
+  }
+
+  changeActiveUser(room: RoomModel, userId: string, changeAll?: boolean) {
+    const dto = this.toDto(room);
+    dto.teamsGroup.forEach((t) => {
+      t.participants.forEach((p) => {
+        this.userService.changeStatus(p.id, UserStatus.READY);
+      })
+    })
+    if (changeAll) {
+      return { socketId: '' };
+    }
+
+    this.userService.changeStatus(userId, UserStatus.ACTIVE);
+    return this.userService.get(userId);
+  }
+
+  deleteRoom(room: RoomModel) {
+    this.changeActiveUser(room, '', true);
+    this.teamService.deleteById(room.teamsGroup);
+    this.roomRepository.deleteById(room.id);
+  }
+
+  removeEmptyRooms(socketIds: string[]) {
+    let deletedCount = 0;
+    const roomMap = this.roomRepository.getAll();
+    for (const id in roomMap) {
+      const room = roomMap[id];
+      const players = this.teamService.getParticipantsIds(room.teamsGroup);
+      const activePlayers = players.filter((pId) => socketIds.includes(pId));
+      const now = Date.now();
+      const removeAfter = room.createdAt.getTime() + HOUR;
+      if (activePlayers.length === 0 && now > removeAfter) {
+        this.deleteRoom(room);
+        deletedCount += 1;
+      }
+    }
+    console.log(`Removed ${deletedCount} rooms`);
   }
 }

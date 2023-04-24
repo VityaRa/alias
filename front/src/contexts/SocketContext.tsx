@@ -17,6 +17,7 @@ export interface SocketActions {
   getUserRequest: (userId: string, roomId: string) => void;
   getUserFromStorage: () => void;
   getOrCreateRoom: (roomSlug: string | null) => void;
+  setError: (error: string | null) => void;
 }
 
 export interface SocketState {
@@ -42,6 +43,10 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
     setState((prev) => ({ ...prev, ...update }));
   };
 
+  const setError = (error: string | null) => {
+    updateState({error})
+  }
+
   const emit = {
     login: ({username}: {username: string}) => {
       socket.emit(SentMessages.LOGIN, { name: username });
@@ -57,8 +62,10 @@ export const SocketContextProvider: WithChildrens<any> = ({ children }) => {
     getOrCreateRoom(roomSlug: string | null) {
       const userId = LocalStorageHelper.get(LS_KEYS.USER_ID);
       socket.emit(SentMessages.GET_OR_CREATE_ROOM, { roomSlug, userId })
-    }
+    },
+    setError
   }
+
 
   const handlers = {
     connected: () => {

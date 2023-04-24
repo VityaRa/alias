@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { VerticalContainer } from "../../common/common";
 import { FC } from "react";
 import { COLORS } from "../../../helpers/colors";
-import { IUser } from "../../../api/user/model";
+import { IUser, UserStatus } from "../../../api/user/model";
 import { Button } from "../../button/button";
 import { AddIcon } from "../../../icons/plus";
 
@@ -11,6 +11,9 @@ interface IProps {
   elements?: IUser[];
   darkenTitle?: boolean;
   onClick: () => void;
+  onUserClick?: (userId: string) => void;
+  userId: string;
+  gameStarted: boolean;
 }
 
 const StyledCard = styled(VerticalContainer)`
@@ -37,9 +40,6 @@ const StyledList = styled.ul`
   padding-bottom: 0;
 `;
 
-const StyledElement = styled.li`
-  padding-bottom: 0.6rem;
-`;
 
 const StyledButton = styled(Button)`
   width: 2.5rem !important;
@@ -56,10 +56,42 @@ const StyledWrapper = styled(VerticalContainer)`
   justify-content: center;
 `;
 
+interface IElementProps {
+  isSelf: boolean;
+  text: string;
+  isActive: boolean;
+  onUserClick?: () => void;
+}
+
+const ListElement: FC<IElementProps> = ({ isSelf, text, isActive, onUserClick }) => {
+  const renderedText = text + (isSelf ? ' (you)' : '');
+  const styles = {
+    paddingBottom: '0.6rem',
+    fontWeight: isSelf ? 800 : 400,
+    color: isActive ? COLORS.ERROR : COLORS.MAIN_WHITE,
+    userSelect: "none" as any,
+  }
+
+  return (
+    <p
+      onClick={(e) => {
+        e.stopPropagation();
+        onUserClick && onUserClick()
+      }}
+      style={styles}>
+      {renderedText}
+    </p>
+  )
+}
+
+
 export const Card: FC<IProps> = ({
   title,
   elements,
   onClick,
+  userId,
+  gameStarted,
+  onUserClick,
   darkenTitle = true
 }) => {
   const renderContent = () => {
@@ -67,7 +99,7 @@ export const Card: FC<IProps> = ({
       return (
         <StyledList>
           {elements?.map((el) => (
-            <StyledElement key={el.name}>{el.name}</StyledElement>
+            <ListElement onUserClick={() => onUserClick && onUserClick(el.id!)} isActive={el.status === UserStatus.ACTIVE} isSelf={el.id === userId} text={el.name!} key={el.name} />
           ))}
         </StyledList>
       );
@@ -80,7 +112,7 @@ export const Card: FC<IProps> = ({
     );
   };
   return (
-    <StyledCard onClick={() => onClick()}>
+    <StyledCard onClick={!gameStarted ? () => onClick() : () => { }}>
       <StyledTitle darkenTitle={darkenTitle}>{title}</StyledTitle>
       {renderContent()}
     </StyledCard>

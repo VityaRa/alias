@@ -25,7 +25,7 @@ export class UserService {
   }
 
   getBySocketId(socketId: string) {
-    const user = this.userRepository.getBySocket(socketId);
+    return this.userRepository.getBySocket(socketId);
   }
 
   get(userId?: string) {

@@ -16,7 +16,15 @@ export class RoomRepository {
     this.roomMap = {};
   }
 
-  create(userDto: UserDto) {
+  deleteById(groupId: string) {
+    delete this.roomMap[groupId];
+  }
+
+  getAll() {
+    return this.roomMap;
+  }
+
+  create(userDto: UserDto, themeId: string) {
     const roomId = v4();
     const linkSlug = v4();
     const room: RoomModel = {
@@ -24,6 +32,13 @@ export class RoomRepository {
       id: roomId,
       linkSlug,
       owner: userDto,
+      selectedThemeId: themeId,
+      startedTime: null,
+      started: false,
+      words: [],
+      prevPlayerId: null,
+      playedUsers: [],
+      createdAt: new Date(),
     }
     this.roomMap[room.id] = room;
     return room;

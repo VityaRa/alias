@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TeamDto, TeamModel, TeamType } from 'src/dto/team';
-import { UserDto } from 'src/dto/user';
+import { UserDto, UserStatus } from 'src/dto/user';
 import { v4 } from 'uuid';
 
 interface TeamMap {
@@ -13,6 +13,10 @@ export class TeamRepository {
   private logger: Logger = new Logger('TeamRepository');
   constructor() {
     this.teamMap = {};
+  }
+
+  deleteById(groupId: string) {
+    delete this.teamMap[groupId];
   }
 
   create(userDto: UserDto) {
@@ -68,6 +72,16 @@ export class TeamRepository {
     return this.teamMap[groupId];
   }
 
+  increasePoint(groupId: string, teamId: string) {
+    const teamGroup = this.teamMap[groupId];
+    this.teamMap[groupId] = teamGroup.map((t) => {
+      if (t.id === teamId) {
+        t.points += 1;
+      }
+      return t;
+    })
+  }
+
   getDefaults(user?: UserDto): TeamModel[] {
     const initialViewers = [];
     if (user) {
@@ -79,18 +93,21 @@ export class TeamRepository {
         participants: [],
         id: v4(),
         type: TeamType.PLAYABLE,
+        points: 0,
       },
       {
         title: 'Команда B',
         participants: [],
         id: v4(),
         type: TeamType.PLAYABLE,
+        points: 0,
       },
       {
         title: 'Наблюдатели',
         participants: initialViewers,
         id: v4(),
         type: TeamType.VIEWERS,
+        points: 0,
       },
     ]
   }
@@ -101,5 +118,21 @@ export class TeamRepository {
 
   debug(): any {
     return this.teamMap;
+  }
+
+  getUserTeamId(groupId: string, userId: string) {
+    const teamGroup = this.teamMap[groupId];
+    let teamId = null;
+    teamGroup.forEach((t) => {
+      if (t.participants.includes(userId)) {
+        teamId = t.id;
+        return;
+      }
+    })
+    return teamId;
+  }
+
+  getById(groupId: string) {
+    return this.teamMap[groupId];
   }
 }
