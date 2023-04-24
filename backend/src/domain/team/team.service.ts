@@ -15,6 +15,10 @@ export class TeamService {
     return this.teamRepository.create(user);
   }
 
+  get(teamGroupId: string) {
+    return this.teamRepository.getById(teamGroupId);
+  }
+
   getParticipantsIds(groupId: string) {
     return this.teamRepository.teamMap[groupId].flatMap((t) => t.participants)
   }
@@ -33,10 +37,6 @@ export class TeamService {
 
   enoughPlayers(teams: TeamDto[]) {
     return teams.filter((t) => t.type !== TeamType.VIEWERS && t.participants.length >= 2).length === 2; 
-  }
-
-  setNextActivePlayer(teamGroup: string, prevActiveUserId: string) {
-    this.teamRepository.setNextActivePlayer(teamGroup, prevActiveUserId);
   }
 
   getPlayersCount(teams: TeamDto[]) {

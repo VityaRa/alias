@@ -20,8 +20,8 @@ interface IProps {
   noViewers?: boolean;
 }
 
-export const Teams: FC<IProps> = ({ noViewers }) => {
-  const { teamsGroup, changeTeam } = useContext(RoomContext);
+export const Teams: FC<IProps> = ({ }) => {
+  const { teamsGroup, changeTeam, changeActiveUser } = useContext(RoomContext);
   
   const {id: userId} = useContext(UserContext);
   const playersTeams = teamsGroup.filter((t) => t.type === TeamType.PLAYABLE);
@@ -39,6 +39,7 @@ export const Teams: FC<IProps> = ({ noViewers }) => {
             elements={team.participants}
             userId={userId!}
             gameStarted={isStarted}
+            onUserClick={changeActiveUser}
           />
         ))}
       </StyledTeamsContainer>

@@ -65,8 +65,17 @@ export class RoomService {
 
   setDefaultActivePlayer(roomModel: RoomModel) {
     const players = this.teamService.getParticipantsIds(roomModel.teamsGroup);
+    const hasActiveUser = this.hasActiveUser(players);
+    if (hasActiveUser) {
+      return;
+    }
     const userId = players[Math.floor((Math.random()*players.length))];
     this.userService.changeStatus(userId, UserStatus.ACTIVE);
+  }
+
+  hasActiveUser(ids: string[]) {
+    const users = ids.map((id) => this.userService.get(id));
+    return users.some((u) => u.status === UserStatus.ACTIVE);
   }
 
   checkIsOwner(room: RoomModel, userId: string) {
@@ -151,40 +160,14 @@ export class RoomService {
     return MINUTE - (now - room.startedTime);
   }
 
-  // getNextUserId(roomModel: RoomModel) {
-  //   const roomDto = this.toDto(roomModel);
-  //   if (!roomModel.prevPlayerId) {
-  //     const newId = roomDto.teamsGroup[0].participants[0].id;
-  //     roomModel.prevPlayerId = newId
-  //     roomModel.playedUsers.push(newId);
-  //     return roomModel.prevPlayerId;
-  //   }
-
-  //   let userId = null;
-  //   roomDto.teamsGroup.forEach((t) => {
-  //     if (t.type === TeamType.VIEWERS) {
-  //       return;
-  //     }
-  //     const ids = t.participants.map((p) => p.id);
-  //     if (!ids.includes(roomModel.prevPlayerId)) {
-  //       const userIndex = ids.indexOf()
-  //       roomModel.prevPlayerId = t.participants.filter()
-  //     }
-  //   })
-  //   return userId;
-  // }
-
-
-  // setNextActivePlayer(room: RoomModel, prevActiveUserId?: string) {
-  //   const roomDto = this.toDto(room);
-  //   if (!prevActiveUserId) {
-  //     const newActiveUserId = roomDto.teamsGroup.filter((t) => t.type !== TeamType.VIEWERS)[0].participants[0].id;
-  //     this.userService.changeStatus(newActiveUserId, UserStatus.ACTIVE);
-  //     return room;
-  //   }
-
-  //   const { currentTeamId, nextTeamId } = this.getActiveAndNextUserTeam(roomDto, prevActiveUserId);
-  //   // this.teamService
-  //   // this.teamService.setNextActivePlayer(room.teamsGroup, prevActiveUserId);
-  // }
+  changeActiveUser(room: RoomModel, userId: string) {
+    const dto = this.toDto(room);
+    dto.teamsGroup.forEach((t) => {
+      t.participants.forEach((p) => {
+        this.userService.changeStatus(p.id, UserStatus.READY);
+      })
+    })
+    this.userService.changeStatus(userId, UserStatus.ACTIVE);
+    return this.userService.get(userId);
+  }
 }

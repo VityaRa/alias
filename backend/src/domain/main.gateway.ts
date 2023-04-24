@@ -12,7 +12,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { RoomService } from './room/room.service';
 import { UserService } from './user/user.service';
-import { ChangeTeamDto, ChangeThemeDto, JoinRoomDto, NextWordDto, StartGameDto } from 'src/dto/room';
+import { ChangeActiveUserDto, ChangeTeamDto, ChangeThemeDto, JoinRoomDto, NextWordDto, StartGameDto } from 'src/dto/room';
 import {
   CreateRoomDto,
   CreateUserDto,
@@ -185,12 +185,12 @@ export class MainGateway
     }
 
     const canStart = this.roomService.canStart(room);
-    if (!canStart) {
-      client.emit(SentMessages.START_GAME, {
-        error: 'Недостаточно игроков (минимум 2 игрока в каждой команде)',
-      });
-      return;
-    }
+    // if (!canStart) {
+    //   client.emit(SentMessages.START_GAME, {
+    //     error: 'Недостаточно игроков (минимум 2 игрока в каждой команде)',
+    //   });
+    //   return;
+    // }
     const newRoom = this.roomService.startGame(room);
     const remainTime = this.roomService.getRemainTime(room);
     const nextWord = this.themeService.getNext(room.selectedThemeId, room.words)
@@ -223,7 +223,29 @@ export class MainGateway
     notifyIds.forEach((id) => {
       this.server.to(id).emit(SentMessages.NEXT_WORD, { nextWord });
     });
+  }
 
+  @SubscribeMessage(IncomingMessages.CHANGED_ACTIVE_USER)
+  handleChangeActiveUser(client: Socket, data: ChangeActiveUserDto) {
+    const user = this.userService.getBySocketId(client.id);
+    const room = this.roomService.getFromLink(data.linkSlug);
+    const isOwner = this.roomService.checkIsOwner(room, user.id);
+    if (!isOwner) {
+      client.emit(SentMessages.START_GAME, {
+        error: 'Нет прав',
+      });
+      return;
+    }
+    if (room.started) {
+      return;
+    }
+    const { socketId } = this.roomService.changeActiveUser(room, data.activeUserId);
+    const roomDto = this.roomService.toDto(room);
+    const teamsGroup = roomDto.teamsGroup;
+    const notifyIds = this.roomService.getUsersToNotify(roomDto);
+    notifyIds.forEach((id) => {
+      this.server.to(id).emit(SentMessages.CHANGED_ACTIVE_USER, { teamsGroup, status: socketId === id ? UserStatus.ACTIVE : UserStatus.READY });
+    });
   }
 
   afterInit(server: Server) {

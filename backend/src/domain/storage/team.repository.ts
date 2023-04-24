@@ -128,11 +128,7 @@ export class TeamRepository {
     return teamId;
   }
 
-  setStatusForUser(userId: string, status: UserStatus) {
-  }
-
-  setNextActivePlayer(teamGroupId: string, prevActiveUserId: string) {
-    const teamGroup = this.teamMap[teamGroupId];
-    const teamId = this.getUserTeamId(teamGroupId, prevActiveUserId);
+  getById(groupId: string) {
+    return this.teamMap[groupId];
   }
 }

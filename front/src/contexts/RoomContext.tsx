@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { ITeam } from "../api/team/model";
 import { ITheme } from "../api/theme/model";
-import { IUser } from "../api/user/model";
+import { IUser, UserStatus } from "../api/user/model";
 import { IWord, WordStatus } from "../api/word/model";
 import { WithChildrens } from "../helpers/types";
 import { SocketContext } from "./SocketContext";
 import { IncomingMessages, SentMessages } from "../helpers/events";
 import { LS_KEYS, LocalStorageHelper } from "../helpers/localStorage";
 import { IRoom } from "../api/room/model";
+import { UserContext } from "./UserContext";
 
 export interface RoomActions {
   updateRoomState: (update: Partial<RoomState>) => void;
@@ -18,6 +19,7 @@ export interface RoomActions {
   nextWord: (status: WordStatus) => void;
   setNextWord: (word: IWord) => void;
   clearWords: () => void;
+  changeActiveUser: (userId: string) => void;
 }
 
 export interface RoomState {
@@ -54,6 +56,7 @@ const defaultState: RoomState = {
 export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
   const [state, setState] = useState(defaultState);
   const { socket } = useContext(SocketContext);
+  const { updateUserState } = useContext(UserContext);
   const updateRoomState = (update: Partial<RoomState>) => {
     setState((prev) => ({ ...prev, ...update }));
   };
@@ -64,6 +67,9 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
   const changeTheme = (themeId: string) => {
     socket.emit(SentMessages.THEME_CHANGE, { themeId, linkSlug: state.linkSlug });
   }
+  const changeActiveUser = (activeUserId: string) => {
+    socket.emit(SentMessages.CHANGED_ACTIVE_USER, { activeUserId, linkSlug: state.linkSlug });
+  }
 
   const handleChangeTeam = ({newRoom}: {newRoom: IRoom}) => {
     updateRoomState({...newRoom})
@@ -71,6 +77,11 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
   
   const handleThemeChange = ({newThemeId}: {newThemeId: string}) => {
     updateRoomState({selectedThemeId: newThemeId});
+  }
+
+  const handleChangeActiveUser = ({teamsGroup, status}: {teamsGroup: ITeam[], status: UserStatus}) => {
+    updateRoomState({teamsGroup});
+    updateUserState({status});
   }
 
   const startGame = () => {
@@ -102,14 +113,18 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
     nextWord,
     setNextWord,
     clearWords,
+    changeActiveUser,
   };
 
   useEffect(() => {
     socket.on(IncomingMessages.TEAM_CHANGE, handleChangeTeam);
     socket.on(IncomingMessages.THEME_CHANGE, handleThemeChange);
+    socket.on(IncomingMessages.CHANGED_ACTIVE_USER, handleChangeActiveUser);
+
     return () => {
       socket.off(IncomingMessages.TEAM_CHANGE, handleChangeTeam);
       socket.off(IncomingMessages.THEME_CHANGE, handleThemeChange);
+      socket.off(IncomingMessages.CHANGED_ACTIVE_USER, handleChangeActiveUser);
     }
   }, [])
 

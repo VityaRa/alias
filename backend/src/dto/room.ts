@@ -52,3 +52,8 @@ export interface NextWordDto {
   wordId: string;
   status: WordStatus;
 }
+
+export interface ChangeActiveUserDto {
+  activeUserId: string;
+  linkSlug: string;
+}

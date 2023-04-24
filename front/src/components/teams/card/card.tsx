@@ -11,6 +11,7 @@ interface IProps {
   elements?: IUser[];
   darkenTitle?: boolean;
   onClick: () => void;
+  onUserClick?: (userId: string) => void;
   userId: string;
   gameStarted: boolean;
 }
@@ -59,18 +60,25 @@ interface IElementProps {
   isSelf: boolean;
   text: string;
   isActive: boolean;
+  onUserClick?: () => void;
 }
 
-const ListElement: FC<IElementProps> = ({isSelf, text, isActive}) => {
+const ListElement: FC<IElementProps> = ({ isSelf, text, isActive, onUserClick }) => {
   const renderedText = text + (isSelf ? ' (you)' : '');
   const styles = {
     paddingBottom: '0.6rem',
     fontWeight: isSelf ? 800 : 400,
     color: isActive ? COLORS.ERROR : COLORS.MAIN_WHITE,
+    userSelect: "none" as any,
   }
-  
+
   return (
-    <p style={styles}>
+    <p
+      onClick={(e) => {
+        e.stopPropagation();
+        onUserClick && onUserClick()
+      }}
+      style={styles}>
       {renderedText}
     </p>
   )
@@ -83,6 +91,7 @@ export const Card: FC<IProps> = ({
   onClick,
   userId,
   gameStarted,
+  onUserClick,
   darkenTitle = true
 }) => {
   const renderContent = () => {
@@ -90,7 +99,7 @@ export const Card: FC<IProps> = ({
       return (
         <StyledList>
           {elements?.map((el) => (
-            <ListElement isActive={el.status === UserStatus.ACTIVE} isSelf={el.id === userId} text={el.name!} key={el.name} />
+            <ListElement onUserClick={() => onUserClick && onUserClick(el.id!)} isActive={el.status === UserStatus.ACTIVE} isSelf={el.id === userId} text={el.name!} key={el.name} />
           ))}
         </StyledList>
       );
@@ -103,7 +112,7 @@ export const Card: FC<IProps> = ({
     );
   };
   return (
-    <StyledCard onClick={!gameStarted ? () => onClick() : () => {}}>
+    <StyledCard onClick={!gameStarted ? () => onClick() : () => { }}>
       <StyledTitle darkenTitle={darkenTitle}>{title}</StyledTitle>
       {renderContent()}
     </StyledCard>
