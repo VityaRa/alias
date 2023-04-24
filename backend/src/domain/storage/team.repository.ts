@@ -15,6 +15,10 @@ export class TeamRepository {
     this.teamMap = {};
   }
 
+  deleteById(groupId: string) {
+    delete this.teamMap[groupId];
+  }
+
   create(userDto: UserDto) {
     const teamGroupId = v4();
 

@@ -14,6 +14,7 @@ export interface RoomModel {
   words: string[];
   prevPlayerId: string | null;
   playedUsers: string[];
+  createdAt: Date;
 }
 
 export interface RoomDto {

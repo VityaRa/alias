@@ -16,6 +16,14 @@ export class RoomRepository {
     this.roomMap = {};
   }
 
+  deleteById(groupId: string) {
+    delete this.roomMap[groupId];
+  }
+
+  getAll() {
+    return this.roomMap;
+  }
+
   create(userDto: UserDto, themeId: string) {
     const roomId = v4();
     const linkSlug = v4();
@@ -30,6 +38,7 @@ export class RoomRepository {
       words: [],
       prevPlayerId: null,
       playedUsers: [],
+      createdAt: new Date(),
     }
     this.roomMap[room.id] = room;
     return room;

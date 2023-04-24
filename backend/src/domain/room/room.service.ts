@@ -14,7 +14,7 @@ import { ERRORS } from '../errors/codes';
 import { ThemeService } from '../theme/theme.service';
 
 const MINUTE = 60 * 1000;
-
+const HOUR = MINUTE * 60;
 
 @Injectable()
 export class RoomService {
@@ -160,14 +160,41 @@ export class RoomService {
     return MINUTE - (now - room.startedTime);
   }
 
-  changeActiveUser(room: RoomModel, userId: string) {
+  changeActiveUser(room: RoomModel, userId: string, changeAll?: boolean) {
     const dto = this.toDto(room);
     dto.teamsGroup.forEach((t) => {
       t.participants.forEach((p) => {
         this.userService.changeStatus(p.id, UserStatus.READY);
       })
     })
+    if (changeAll) {
+      return { socketId: '' };
+    }
+
     this.userService.changeStatus(userId, UserStatus.ACTIVE);
     return this.userService.get(userId);
+  }
+
+  deleteRoom(room: RoomModel) {
+    this.roomRepository.deleteById(room.id);
+    this.teamService.deleteById(room.teamsGroup);
+    this.changeActiveUser(room, '', true);
+  }
+
+  removeEmptyRooms() {
+    let deletedCount = 0;
+    const roomMap = this.roomRepository.getAll();
+    for (const id in roomMap) {
+      const room = roomMap[id];
+      const playersCount = this.teamService.getParticipantsIds(room.teamsGroup).length;
+      const now = Date.now();
+      const removeAfter = room.createdAt.getTime() + HOUR;
+      if (playersCount === 0 && now > removeAfter) {
+        this.deleteRoom(room);
+        deletedCount += 1;
+      }
+    }
+    console.log(`Removed ${deletedCount} rooms`);
+    
   }
 }

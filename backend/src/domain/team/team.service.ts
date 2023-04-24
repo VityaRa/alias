@@ -7,6 +7,10 @@ import { TeamDto, TeamType } from 'src/dto/team';
 export class TeamService {
   constructor(private teamRepository: TeamRepository) { };
 
+  deleteById(groupId: string) {
+    this.teamRepository.deleteById(groupId);
+  }
+
   getDefaults(user: UserDto) {
     return this.teamRepository.getDefaults(user);
   }

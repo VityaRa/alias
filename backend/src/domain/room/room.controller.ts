@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { RoomService } from './room.service';
+import { Cron } from '@nestjs/schedule';
 
 
 @Controller('room')
@@ -15,5 +16,13 @@ export class RoomController {
       result.push(this.roomService.toDto(roomModel));
     }
     return result
+  }
+
+  
+  @Cron('0 * * * *')
+  checkForEmptyRooms() {
+    console.log('Checking for empty rooms...');
+    this.roomService.removeEmptyRooms();
+    console.log('Finished for empty rooms...');
   }
 }

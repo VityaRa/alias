@@ -23,6 +23,7 @@ import { TeamService } from './team/team.service';
 import { ERRORS } from './errors/codes';
 import { IncomingMessages, SentMessages } from './events/events';
 import { ThemeService } from './theme/theme.service';
+import { Cron } from '@nestjs/schedule';
 
 interface TimeoutsMap {
   [roomId: string]: NodeJS.Timeout;
