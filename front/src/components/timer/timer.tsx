@@ -11,8 +11,7 @@ const STATUS = {
 const INITIAL_COUNT = 120
 
 const AbsoluteContainer = styled.div`
-  position: absolute;
-  bottom: 2rem;
+  margin-top: 2rem;
 `
 
 const TimerText = styled(DefaultText)`

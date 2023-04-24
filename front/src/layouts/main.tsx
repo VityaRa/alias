@@ -14,12 +14,12 @@ const StyledMain = styled.main`
 
 type MainLayoutProps = {}
 
-export const Main: WithChildrens<MainLayoutProps> = ({children}) => {
+export const Main: WithChildrens<MainLayoutProps> = ({ children }) => {
 	const { isStarted } = useGameState();
 
-  return (
-    <StyledMain style={{alignItems: !isStarted ? 'center' : 'flex-start'}}>
+	return (
+		<StyledMain style={{ alignItems: !isStarted ? 'center' : 'flex-start', height: !isStarted ? '100%' : '100vh'}}>
 			{children}
 		</StyledMain>
-  )
+	)
 }

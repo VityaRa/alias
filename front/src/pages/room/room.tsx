@@ -12,6 +12,17 @@ import { Timer } from "../../components/timer/timer";
 import { Words } from "../../components/words/words";
 import { RoomContext } from "../../contexts/RoomContext";
 import { UserContext } from "../../contexts/UserContext";
+import styled from "styled-components";
+
+const Container = styled(VerticalContainer)`
+  height: 100%;
+  padding: 2rem 0;
+`
+
+const GameContainer = styled(VerticalContainer)`
+  justify-content: flex-end;
+  height: 100%;
+`
 
 export const RoomPage = () => {
   const {
@@ -23,7 +34,7 @@ export const RoomPage = () => {
     remainTime,
   } = useContext(RoomContext);
   const { id: userId } = useContext(UserContext);
-  // add logic to check room
+
   const getThemes = async () => {
     const labels = await themeController.getLabels();
     updateRoomState({ themes: labels as ITheme[] });
@@ -38,20 +49,20 @@ export const RoomPage = () => {
   }
 
   return (
-    <VerticalContainer>
+    <Container>
       <InviteLink />
       <ThemeSelector />
       <Teams />
       {started && (
-        <>
+        <GameContainer>
           <Words />
           <GameButtons />
           <Timer/>
-        </>
+        </GameContainer>
       )}
       {!started && (
         <StartGame isOwner={owner?.id === userId} onClick={() => startGame()} />
       )}
-    </VerticalContainer>
+    </Container>
   );
 };

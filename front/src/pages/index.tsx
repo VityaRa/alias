@@ -60,8 +60,6 @@ export const Page = ({ Component }: IProps) => {
   }
 
   const handleNextWord = (data: NextWordResult) => {
-    console.log('GOT NEXT WORD');
-    
     setNextWord(data.nextWord)
   }
 
@@ -70,7 +68,7 @@ export const Page = ({ Component }: IProps) => {
     socket.on(IncomingMessages.LOGIN, handleGet);
     socket.on(IncomingMessages.GET_OR_CREATE_ROOM, handleGetOrCreateRoom);
     socket.on(IncomingMessages.START_GAME, handleStartGame);
-    socket.on(IncomingMessages.END_GAME, handleEndGame);
+    // socket.on(IncomingMessages.END_GAME, handleEndGame);
     socket.on(IncomingMessages.NEXT_WORD, handleNextWord);
     return () => {
       socket.off(IncomingMessages.GET, handleGet);

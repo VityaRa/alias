@@ -17,7 +17,6 @@ export interface RoomActions {
   startGame: () => void;
   nextWord: (status: WordStatus) => void;
   setNextWord: (word: IWord) => void;
-
 }
 
 export interface RoomState {
@@ -86,8 +85,6 @@ export const RoomContextProvider: WithChildrens<any> = ({ children }) => {
   }
 
   const setNextWord = (word: IWord) => {
-    console.log(word);
-    console.log(state.words);
     setState((prev) => ({...prev, words: [...prev.words, word]}))
   }
 

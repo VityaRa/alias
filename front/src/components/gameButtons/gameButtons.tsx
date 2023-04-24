@@ -8,6 +8,7 @@ import { WordStatus } from '../../api/word/model'
 
 const ButtonsContainer = styled(Container)`
   gap: 2rem;  
+  margin-top: 1.5rem;
 `
 
 const GameButton = styled(Button)`

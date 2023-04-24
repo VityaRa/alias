@@ -207,8 +207,15 @@ export class MainGateway
   @SubscribeMessage(IncomingMessages.NEXT_WORD)
   handleNextWordStart(client: Socket, data: NextWordDto) {
     const user = this.userService.getBySocketId(client.id);
+    if (user.status !== UserStatus.ACTIVE) {
+      return;
+    }
     const room = this.roomService.getFromLink(data.linkSlug);
-    const nextWord = this.themeService.getNext(room.selectedThemeId, room.words)
+    const nextWord = this.themeService.getNext(room.selectedThemeId, room.words);
+
+    if (!nextWord?.id) {
+      return;
+    }
     room.words.push(nextWord.id)
     const roomDto = this.roomService.toDto(room);
 
@@ -216,6 +223,7 @@ export class MainGateway
     notifyIds.forEach((id) => {
       this.server.to(id).emit(SentMessages.NEXT_WORD, { nextWord });
     });
+
   }
 
   afterInit(server: Server) {
