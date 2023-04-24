@@ -22,6 +22,7 @@ interface IProps {
 
 export const Teams: FC<IProps> = ({ noViewers }) => {
   const { teamsGroup, changeTeam } = useContext(RoomContext);
+  
   const {id: userId} = useContext(UserContext);
   const playersTeams = teamsGroup.filter((t) => t.type === TeamType.PLAYABLE);
   const viewerTeam = teamsGroup.find((t) => t.type === TeamType.VIEWERS);

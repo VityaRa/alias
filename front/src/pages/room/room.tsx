@@ -13,6 +13,7 @@ import { Words } from "../../components/words/words";
 import { RoomContext } from "../../contexts/RoomContext";
 import { UserContext } from "../../contexts/UserContext";
 import styled from "styled-components";
+import { UserStatus } from "../../api/user/model";
 
 const Container = styled(VerticalContainer)`
   height: 100%;
@@ -33,8 +34,8 @@ export const RoomPage = () => {
     started,
     remainTime,
   } = useContext(RoomContext);
-  const { id: userId } = useContext(UserContext);
-
+  const { id: userId, status } = useContext(UserContext);
+  const isTalking = status === UserStatus.ACTIVE;
   const getThemes = async () => {
     const labels = await themeController.getLabels();
     updateRoomState({ themes: labels as ITheme[] });
@@ -56,7 +57,7 @@ export const RoomPage = () => {
       {started && (
         <GameContainer>
           <Words />
-          <GameButtons />
+          {isTalking && <GameButtons />}
           <Timer/>
         </GameContainer>
       )}

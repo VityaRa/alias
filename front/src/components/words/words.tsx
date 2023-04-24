@@ -29,15 +29,25 @@ const Word = styled(VerticalContainer)`
   text-transform: capitalize;
 `
 
+const MAX_COUNT = 15;
+
+const getOpacity = (index: number) => {
+  if (index > MAX_COUNT) {
+    return 0;
+  }
+  return (index / MAX_COUNT);
+}
+
 export const Words = () => {
   const { words } = useContext(RoomContext);
   const { status } = useContext(UserContext);
   
   const showLastWord = status === UserStatus.ACTIVE
   const showWordsCount = showLastWord ? words.length : words.length - 1;
+  
   return (
     <WordsContainer>
-      {words.slice(0, showWordsCount).map((w) => <Word key={w.id}>{w.value}</Word>)}
+      {words.slice(0, showWordsCount).map((w, i, a) => <Word style={{opacity: getOpacity(i - a.length + MAX_COUNT + 1)}} key={w.id}>{w.value}</Word>)}
     </WordsContainer>
   )
 }

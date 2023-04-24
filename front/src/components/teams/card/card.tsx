@@ -62,12 +62,13 @@ interface IElementProps {
 }
 
 const ListElement: FC<IElementProps> = ({isSelf, text, isActive}) => {
-  const renderedText = isSelf ? text + ' (you)' : '';
+  const renderedText = text + (isSelf ? ' (you)' : '');
   const styles = {
-    paddingBottom: '0,6rem',
+    paddingBottom: '0.6rem',
     fontWeight: isSelf ? 800 : 400,
     color: isActive ? COLORS.ERROR : COLORS.MAIN_WHITE,
   }
+  
   return (
     <p style={styles}>
       {renderedText}
